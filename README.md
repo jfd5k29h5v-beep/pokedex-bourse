@@ -1,5 +1,4 @@
-# pokedex-bourse
-[pokemon_tracker.html](https://github.com/user-attachments/files/29047249/pokemon_tracker.html)
+[index.html](https://github.com/user-attachments/files/29059459/index.html)
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -435,6 +434,68 @@ select.finp { cursor: pointer; }
 @media (max-width: 600px) {
   .modal-card-img, .modal-img-placeholder { width: 120px; height: 168px; }
 }
+
+/* ── ANIMATIONS ─────────────────────────────────────── */
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(16px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.card-tile { animation: cardIn 0.45s cubic-bezier(.22,1,.36,1) both; }
+.card-tile:active { transform: scale(0.98); }
+
+@keyframes rowIn {
+  from { opacity: 0; transform: translateX(-8px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+tbody tr { animation: rowIn 0.35s ease both; }
+
+@keyframes toastIn {
+  0%   { transform: translateY(20px) scale(0.92); opacity: 0; }
+  60%  { transform: translateY(-3px) scale(1.02); opacity: 1; }
+  100% { transform: translateY(0) scale(1); }
+}
+.toast.show { animation: toastIn 0.4s ease; }
+
+@keyframes flashGold {
+  0%   { background: rgba(245,200,66,0.35); }
+  100% { background: transparent; }
+}
+.flash { animation: flashGold 0.9s ease; }
+
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.85); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.chip { animation: popIn 0.3s ease both; }
+.chip:active { transform: scale(0.94); }
+
+.btn:active { transform: scale(0.96); }
+
+@keyframes pulseGlow {
+  0%,100% { box-shadow: 0 0 0 rgba(245,200,66,0); }
+  50% { box-shadow: 0 0 14px rgba(245,200,66,0.35); }
+}
+.chase-tile { border-style: dashed !important; animation: pulseGlow 2.4s ease-in-out infinite; }
+
+/* ── LOCATION PILL ──────────────────────────────────── */
+.loc-pill {
+  position: absolute; bottom: 8px; right: 8px; z-index: 3;
+  font-size: 12px; background: rgba(13,13,20,0.7); border-radius: 50%;
+  width: 22px; height: 22px; display: flex; align-items: center; justify-content: center;
+  backdrop-filter: blur(4px);
+}
+
+/* ── CHIP ADD BUTTON ────────────────────────────────── */
+.chip-add {
+  background: transparent; border: 1px dashed var(--fog); color: var(--dim);
+}
+.chip-add:hover { border-color: var(--gold); color: var(--gold); }
+
+/* ── MOVE CARD SECTION ──────────────────────────────── */
+.move-row { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; }
+.move-row .fg { flex: 1; min-width: 120px; }
+.chips-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.chips-row + .chips-row { margin-top: 8px; }
 </style>
 </head>
 <body>
@@ -477,17 +538,9 @@ select.finp { cursor: pointer; }
   </div>
 
   <!-- Filter chips -->
-  <div class="chips" id="chipsBar">
-    <span class="chip on" onclick="setCat('all',this)">Toutes</span>
-    <span class="chip" onclick="setCat('SAR',this)">SAR / V / VMAX</span>
-    <span class="chip" onclick="setCat('TG',this)">TG / GG</span>
-    <span class="chip" onclick="setCat('AR',this)">AR</span>
-    <span class="chip" onclick="setCat('151',this)">151</span>
-    <span class="chip" onclick="setCat('EX',this)">EX anciens</span>
-    <span class="chip" onclick="setCat('VINTAGE',this)">Vintage</span>
-    <span class="chip" onclick="setCat('profit',this)">📈 En hausse</span>
-    <span class="chip" onclick="setCat('loss',this)">📉 En baisse</span>
-    <span class="chip" onclick="setCat('graded',this)">🏆 Gradées</span>
+  <div class="chips" id="chipsBar" style="flex-direction:column;align-items:stretch">
+    <div class="chips-row" id="chipsRowCat"></div>
+    <div class="chips-row" id="chipsRowLoc"></div>
   </div>
 
   <!-- Sort bar -->
@@ -563,7 +616,8 @@ select.finp { cursor: pointer; }
       <div class="notice">
         💡 Renseigne le nom <strong>exact en français</strong>, la référence (ex: 199/165) et le set.
         Le <strong>prix NM France</strong> correspond à la 1ère offre de vente en état NM, vendeur France, sur Cardmarket.<br>
-        L'image sera récupérée sur <strong>Pokécardex</strong> — ou colle directement une URL d'image.
+        L'image sera récupérée sur <strong>Pokécardex</strong> — ou colle directement une URL d'image.<br>
+        🎯 Choisis la catégorie <strong>Chase Card</strong> pour une carte que tu vises pour un futur achat : elle apparaîtra dans son propre onglet et ne sera <strong>pas comptée</strong> dans la valeur de ta collection.
       </div>
       <div class="form-grid">
         <div class="fg">
@@ -580,14 +634,13 @@ select.finp { cursor: pointer; }
         </div>
         <div class="fg">
           <label>Catégorie</label>
-          <select class="finp" id="f-cat">
-            <option value="SAR">SAR / V / VMAX / VSTAR</option>
-            <option value="AR">AR</option>
-            <option value="TG">TG / GG</option>
-            <option value="151">151</option>
-            <option value="EX">EX (ancienne ère)</option>
-            <option value="GX">GX</option>
-            <option value="VINTAGE">Vintage / Légende</option>
+          <select class="finp" id="f-cat" onchange="onFormChange()"></select>
+        </div>
+        <div class="fg">
+          <label>Localisation</label>
+          <select class="finp" id="f-loc">
+            <option value="maison">🏠 Chez moi</option>
+            <option value="banque">🏦 En banque</option>
           </select>
         </div>
         <div class="fg">
@@ -595,7 +648,7 @@ select.finp { cursor: pointer; }
           <input class="finp" id="f-invest" type="number" step="0.01" placeholder="45.00" oninput="onFormChange()">
         </div>
         <div class="fg">
-          <label>Prix NM France actuel (€) *</label>
+          <label id="f-price-label">Prix NM France actuel (€) *</label>
           <input class="finp" id="f-price" type="number" step="0.01" placeholder="85.00" oninput="onFormChange()">
         </div>
         <div class="fg">
@@ -688,9 +741,28 @@ select.finp { cursor: pointer; }
         </div>
 
         <!-- Mini chart -->
-        <div>
+        <div id="miniChartSection">
           <div class="ph-label">Évolution du prix</div>
           <div class="mini-chart-wrap"><canvas id="miniChart"></canvas></div>
+        </div>
+
+        <!-- Move card -->
+        <div>
+          <div class="ph-label">Déplacer la carte</div>
+          <div class="move-row">
+            <div class="fg">
+              <label>Catégorie</label>
+              <select class="finp" id="moveCat"></select>
+            </div>
+            <div class="fg">
+              <label>Localisation</label>
+              <select class="finp" id="moveLoc">
+                <option value="maison">🏠 Chez moi</option>
+                <option value="banque">🏦 En banque</option>
+              </select>
+            </div>
+            <button class="btn btn-blue" onclick="applyMove()" style="margin-bottom:1px">Déplacer</button>
+          </div>
         </div>
 
         <!-- Actions -->
@@ -705,6 +777,17 @@ select.finp { cursor: pointer; }
 
 <script>
 // ════════════════════════════════════════════════════
+// IMAGE HELPER — fallback webp→png→placeholder
+// ════════════════════════════════════════════════════
+function imgTag(c, cssClass, style='') {
+  if (!c.imgUrl) return `<div class="${cssClass}" style="${style}display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;color:var(--fog)"><div style="font-size:28px;opacity:.2">⚡</div><div style="font-size:8px;text-align:center;padding:0 6px">${c.name}</div></div>`;
+  // Try webp, fallback to png (same URL without /high.webp → /high.png), then placeholder
+  const urlPng = c.imgUrl.replace('/high.webp', '/high.png');
+  return `<img class="${cssClass}" style="${style}" src="${c.imgUrl}" alt="${c.name}" loading="lazy"
+    onerror="if(this.src.endsWith('.webp')){this.src=this.src.replace('/high.webp','/high.png');}else{this.style.display='none';this.insertAdjacentHTML('afterend','<div style=\\'display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;color:var(--fog);width:100%;height:100%\\'><div style=\\'font-size:28px;opacity:.2\\'>⚡</div><div style=\\'font-size:8px;text-align:center;padding:0 6px\\'>${c.name.replace(/'/g,"&#39;")}</div></div>');}">`;
+}
+
+// ════════════════════════════════════════════════════
 // DATA — Collection Gaspard (prix = 1ère offre NM France CM)
 // ════════════════════════════════════════════════════
 // Prix indexés : première offre de vente NM, vendeur France, Cardmarket FR
@@ -715,258 +798,258 @@ select.finp { cursor: pointer; }
 const DEFAULT_DATA = [
   // ── Les grosses pièces gradées ──
   {id:1,name:"LUGIA V",ref:"186/195",set:"SIT FR",cat:"SAR",invest:185,prices:{"30/03/24":450,"23/02/25":500,"25/03/26":1000},graded:"CA 10",
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/SIT/186.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/swsh/swsh12/186/high.webp"},
   {id:2,name:"RAYQUAZA VMAX",ref:"218/203",set:"SIT FR",cat:"SAR",invest:700,prices:{"23/02/25":1000,"25/03/26":2000},graded:"CA 10",
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/SIT/218.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/swsh/swsh12/218/high.webp"},
   {id:3,name:"GIRATINA VSTAR",ref:"GG69/GG70",set:"CRZ FR",cat:"TG",invest:56,prices:{"30/03/24":110,"23/02/25":250,"25/03/26":280},graded:"CA 9.5",
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/CRZ/GG69.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/swsh/swsh12pt5/GG69/high.webp"},
   {id:4,name:"MEWTWO VSTAR",ref:"GG44/GG70",set:"CRZ FR",cat:"TG",invest:139,prices:{"30/03/24":150,"23/02/25":155,"25/03/26":230},graded:"CA 9.5",
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/CRZ/GG44.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/swsh/swsh12pt5/GG44/high.webp"},
   {id:5,name:"RAYQUAZA VMAX TG",ref:"TG20/TG30",set:"BRS FR",cat:"TG",invest:65,prices:{"30/03/24":100,"23/02/25":140,"25/03/26":350},graded:"CA 10",
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/BRS/TG20.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/swsh/swsh9/TG20/high.webp"},
   {id:6,name:"RAIKOU V",ref:"GG41/GG70",set:"CRZ FR",cat:"TG",invest:41,prices:{"30/03/24":32,"23/02/25":45,"25/03/26":100},graded:"CA 10",
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/CRZ/GG41.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/swsh/swsh12pt5/GG41/high.webp"},
   {id:7,name:"SUICUNE V",ref:"GG38/GG70",set:"CRZ FR",cat:"TG",invest:42,prices:{"23/02/25":75,"25/03/26":170},graded:"CA 9.5",
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/CRZ/GG38.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/swsh/swsh12pt5/GG38/high.webp"},
   {id:8,name:"MEW V",ref:"251/264",set:"FST FR",cat:"SAR",invest:55,prices:{"30/03/24":80,"23/02/25":95,"25/03/26":130},graded:"CA 8",
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/FST/251.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/swsh/swsh11/251/high.webp"},
   {id:9,name:"PTÉRA V",ref:"180/196",set:"PAL FR",cat:"SAR",invest:185,prices:{"30/03/24":210,"23/02/25":210,"25/03/26":250},graded:"CA 7",
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/PAL/180.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv02/180/high.webp"},
   {id:10,name:"GARDEVOIR EX",ref:"233/091",set:"DES PAL FR",cat:"SAR",invest:null,prices:{"25/03/26":185},graded:"CA 9.5",
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/PAL/233.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv02/233/high.webp"},
   // ── SAR / VSTAR / VMAX ──
   {id:11,name:"LÉVIATOR EX",ref:"123/122",set:"TEF FR",cat:"SAR",invest:20,prices:{"30/03/24":40,"23/02/25":80,"25/03/26":175},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/TEF/123.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv05/123/high.webp"},
   {id:12,name:"DRATTAK EX",ref:"187/159",set:"JTG FR",cat:"SAR",invest:140,prices:{"25/03/26":250},graded:"CA 10",
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/JTG/187.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv09/187/high.webp"},
   {id:13,name:"ALAKAZAM EX",ref:"125/124",set:"TEF FR",cat:"SAR",invest:80,prices:{"25/03/26":300},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/TEF/125.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv05/125/high.webp"},
   {id:14,name:"MEWTWO EX",ref:"163/162",set:"TEF FR",cat:"SAR",invest:80,prices:{"25/03/26":300},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/TEF/163.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv05/163/high.webp"},
   {id:15,name:"ARCEUS VSTAR",ref:"GG70/GG70",set:"CRZ FR",cat:"TG",invest:55,prices:{"30/03/24":56,"23/02/25":130,"25/03/26":135},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/CRZ/GG70.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/swsh/swsh12pt5/GG70/high.webp"},
   {id:16,name:"DIALGA ORIGINEL VSTAR",ref:"GG68/GG70",set:"CRZ FR",cat:"TG",invest:25,prices:{"30/03/24":35,"23/02/25":90,"25/03/26":100},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/CRZ/GG68.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/swsh/swsh12pt5/GG68/high.webp"},
   {id:17,name:"PALKIA ORIGINEL VSTAR",ref:"GG67/GG70",set:"CRZ FR",cat:"TG",invest:38,prices:{"30/03/24":35,"23/02/25":90,"25/03/26":90},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/CRZ/GG67.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/swsh/swsh12pt5/GG67/high.webp"},
   {id:18,name:"DARKRAI VSTAR",ref:"GG50/GG70",set:"CRZ FR",cat:"TG",invest:30,prices:{"23/02/25":55,"25/03/26":80},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/CRZ/GG50.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/swsh/swsh12pt5/GG50/high.webp"},
   {id:19,name:"DEOXYS VSTAR",ref:"GG46/GG70",set:"CRZ FR",cat:"TG",invest:22,prices:{"30/03/24":25,"23/02/25":40,"25/03/26":80},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/CRZ/GG46.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/swsh/swsh12pt5/GG46/high.webp"},
   {id:20,name:"TYRANOCIF V",ref:"155/163",set:"AST FR",cat:"SAR",invest:79,prices:{"30/03/24":130,"23/02/25":130,"25/03/26":138},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/AST/155.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/swsh/swsh10/155/high.webp"},
   {id:21,name:"DRACAUFEU EX SAR",ref:"223/197",set:"OBF FR",cat:"SAR",invest:80,prices:{"30/03/24":72,"23/02/25":90,"25/03/26":70},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/OBF/223.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv03/223/high.webp"},
   {id:22,name:"DRACAUFEU VSTAR PROMO",ref:"SWSH262",set:"PROMO FR",cat:"SAR",invest:58,prices:{"30/03/24":45,"23/02/25":140,"25/03/26":105},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/PR/SWSH262.jpg"},
+   imgUrl:null},
   {id:23,name:"AQUALI VMAX PROMO",ref:"SWSH182",set:"PROMO FR",cat:"SAR",invest:38,prices:{"30/03/24":50,"23/02/25":120,"25/03/26":95},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/PR/SWSH182.jpg"},
+   imgUrl:null},
   {id:24,name:"PALKIA ORIGINEL V",ref:"178/189",set:"AST FR",cat:"SAR",invest:60,prices:{"30/03/24":60,"23/02/25":70,"25/03/26":90},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/AST/178.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/swsh/swsh10/178/high.webp"},
   {id:25,name:"PINGOLÉON V",ref:"146/163",set:"AST FR",cat:"SAR",invest:45,prices:{"30/03/24":57,"23/02/25":70,"25/03/26":90},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/AST/146.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/swsh/swsh10/146/high.webp"},
   {id:26,name:"DRACAUFEU EX CLINIQUE",ref:"234/091",set:"DES PAL FR",cat:"SAR",invest:200,prices:{"25/03/26":210},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/PAL/234.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv02/234/high.webp"},
   {id:27,name:"DRACAUFEU V CLINIQUE",ref:"154/172",set:"BRS FR",cat:"SAR",invest:245,prices:{"25/03/26":260},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/BRS/154.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/swsh/swsh9/154/high.webp"},
   {id:28,name:"MILOBELLUS EX CLINIQUE",ref:"237/191",set:"SSP FR",cat:"SAR",invest:200,prices:{"25/03/26":200},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/SSP/237.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv08/237/high.webp"},
   {id:29,name:"CELEBI V",ref:"245/264",set:"FST FR",cat:"SAR",invest:57,prices:{"30/03/24":65,"23/02/25":79,"25/03/26":85},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/FST/245.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/swsh/swsh11/245/high.webp"},
   {id:30,name:"BRUYVERNE V",ref:"196/203",set:"SIT FR",cat:"SAR",invest:35.5,prices:{"30/03/24":54,"23/02/25":47,"25/03/26":60},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/SIT/196.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/swsh/swsh12/196/high.webp"},
   {id:31,name:"DIALGA ORIGINEL V",ref:"177/189",set:"AST FR",cat:"SAR",invest:60,prices:{"30/03/24":60,"23/02/25":60,"25/03/26":62},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/AST/177.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/swsh/swsh10/177/high.webp"},
   {id:32,name:"ARCEUS V",ref:"166/172",set:"BRS FR",cat:"SAR",invest:65,prices:{"30/03/24":50,"23/02/25":50,"25/03/26":65},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/BRS/166.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/swsh/swsh9/166/high.webp"},
   {id:33,name:"FEU PERÇANT EX",ref:"204/162",set:"TEF FR",cat:"SAR",invest:90,prices:{"23/02/25":89,"25/03/26":80},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/TEF/204.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv05/204/high.webp"},
   {id:34,name:"VERT-DE-FER EX",ref:"203/162",set:"TEF FR",cat:"SAR",invest:70,prices:{"23/02/25":76,"25/03/26":65},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/TEF/203.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv05/203/high.webp"},
   {id:35,name:"CHEF-DE-FER EX",ref:"206/162",set:"TEF FR",cat:"SAR",invest:70,prices:{"23/02/25":95,"25/03/26":70},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/TEF/206.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv05/206/high.webp"},
   {id:36,name:"GARDE-DE-FER EX",ref:"249/182",set:"PAR FR",cat:"SAR",invest:73,prices:{"23/02/25":73,"25/03/26":45},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/PAR/249.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv04/249/high.webp"},
   {id:37,name:"ALTARIA EX",ref:"253/182",set:"PAR FR",cat:"SAR",invest:90,prices:{"23/02/25":100,"25/03/26":80},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/PAR/253.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv04/253/high.webp"},
   {id:38,name:"FARFUREX EX",ref:"175/189",set:"AST FR",cat:"SAR",invest:20,prices:{"25/03/26":50},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/AST/175.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/swsh/swsh10/175/high.webp"},
   {id:39,name:"DARDARGNAN V",ref:"167/189",set:"AST FR",cat:"SAR",invest:40,prices:{"23/02/25":50,"25/03/26":50},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/AST/167.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/swsh/swsh10/167/high.webp"},
   {id:40,name:"MYGAVOLT EX",ref:"168/142",set:"SCR FR",cat:"SAR",invest:null,prices:{"23/02/25":45,"25/03/26":40},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/SCR/168.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv07/168/high.webp"},
   {id:41,name:"KOREAIDON EX",ref:"247/198",set:"SVI FR",cat:"SAR",invest:40,prices:{"23/02/25":36,"25/03/26":30},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/SVI/247.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv01/247/high.webp"},
   {id:42,name:"MIRAIDON EX",ref:"244/198",set:"SVI FR",cat:"SAR",invest:30,prices:{"23/02/25":35,"25/03/26":30},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/SVI/244.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv01/244/high.webp"},
   {id:43,name:"GARDEVOIR EX",ref:"245/198",set:"SVI FR",cat:"SAR",invest:60,prices:{"25/03/26":70},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/SVI/245.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv01/245/high.webp"},
   {id:44,name:"MIASCARADE EX",ref:"256/193",set:"PAL FR",cat:"SAR",invest:20,prices:{"30/03/24":22,"23/02/25":18,"25/03/26":20},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/PAL/256.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv02/256/high.webp"},
   {id:45,name:"CARCHACROK EX",ref:"245/182",set:"PAR FR",cat:"SAR",invest:52,prices:{"30/03/24":44,"23/02/25":45,"25/03/26":40},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/PAR/245.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv04/245/high.webp"},
   {id:46,name:"YUYU EX",ref:"259/193",set:"PAL FR",cat:"SAR",invest:45,prices:{"30/03/24":38,"23/02/25":38,"25/03/26":36},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/PAL/259.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv02/259/high.webp"},
   {id:47,name:"FLAMIGATOR EX",ref:"258/193",set:"PAL FR",cat:"SAR",invest:20,prices:{"23/02/25":20,"25/03/26":20},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/PAL/258.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv02/258/high.webp"},
   {id:48,name:"DINGLU EX",ref:"263/193",set:"PAL FR",cat:"SAR",invest:12,prices:{"25/03/26":12},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/PAL/263.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv02/263/high.webp"},
   {id:49,name:"GENESECT EX",ref:"169/086",set:"SFA FR",cat:"SAR",invest:20,prices:{"25/03/26":35},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/SFA/169.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv06pt5/169/high.webp"},
   {id:50,name:"GENESECT V",ref:"255/264",set:"FST FR",cat:"SAR",invest:20,prices:{"25/03/26":25},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/FST/255.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/swsh/swsh11/255/high.webp"},
   {id:51,name:"ZACIAN EX",ref:"186/159",set:"JTG FR",cat:"SAR",invest:null,prices:{"25/03/26":55},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/JTG/186.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv09/186/high.webp"},
   {id:52,name:"MÉGA DIANCIE EX",ref:"282/217",set:"TWM FR",cat:"SAR",invest:null,prices:{"25/03/26":110},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/TWM/282.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv06/282/high.webp"},
   {id:53,name:"MÉGA OHMASSACRE",ref:"278/217",set:"TWM FR",cat:"SAR",invest:null,prices:{"25/03/26":45},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/TWM/278.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv06/278/high.webp"},
   {id:54,name:"URSAKING LUNE V.EX",ref:"216/217",set:"TWM FR",cat:"SAR",invest:40,prices:{"25/03/26":35},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/TWM/216.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv06/216/high.webp"},
   {id:55,name:"CORBOSS V",ref:"162/172",set:"BRS FR",cat:"SAR",invest:25,prices:{"30/03/24":20,"23/02/25":22,"25/03/26":19},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/BRS/162.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/swsh/swsh9/162/high.webp"},
   {id:56,name:"HOOPA V",ref:"GG53/GG70",set:"CRZ FR",cat:"TG",invest:7,prices:{"30/03/24":14,"23/02/25":15,"25/03/26":18},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/CRZ/GG53.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/swsh/swsh12pt5/GG53/high.webp"},
   {id:57,name:"ZAMAZENTA V GG",ref:"GG54/GG70",set:"CRZ FR",cat:"TG",invest:30,prices:{"23/02/25":30,"25/03/26":35},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/CRZ/GG54.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/swsh/swsh12pt5/GG54/high.webp"},
   {id:58,name:"LUMINÉON V",ref:"156/172",set:"BRS FR",cat:"SAR",invest:27,prices:{"23/02/25":25,"25/03/26":23},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/BRS/156.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/swsh/swsh9/156/high.webp"},
   {id:59,name:"LUMINÉON V GG",ref:"GG39/GG70",set:"CRZ FR",cat:"TG",invest:15,prices:{"23/02/25":15,"25/03/26":20},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/CRZ/GG39.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/swsh/swsh12pt5/GG39/high.webp"},
   {id:60,name:"ZARBI V",ref:"177/195",set:"SIT FR",cat:"SAR",invest:35,prices:{"23/02/25":40,"25/03/26":37},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/SIT/177.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/swsh/swsh12/177/high.webp"},
   {id:61,name:"BERSEKATT DE GALAR V",ref:"184/196",set:"SIT FR",cat:"SAR",invest:47,prices:{"23/02/25":38,"25/03/26":30},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/SIT/184.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/swsh/swsh12/184/high.webp"},
   {id:62,name:"MOUFFLAIR V",ref:"181/195",set:"SIT FR",cat:"SAR",invest:15,prices:{"23/02/25":20,"25/03/26":16},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/SIT/181.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/swsh/swsh12/181/high.webp"},
   {id:63,name:"TAPATOÈS EX",ref:"264/193",set:"PAL FR",cat:"SAR",invest:10,prices:{"23/02/25":15,"25/03/26":12},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/PAL/264.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv02/264/high.webp"},
   {id:64,name:"ROC-DE-FER EX",ref:"207/162",set:"TEF FR",cat:"SAR",invest:43,prices:{"23/02/25":50,"25/03/26":40},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/TEF/207.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv05/207/high.webp"},
   {id:65,name:"FORT IVOIRE EX",ref:"246/198",set:"SVI FR",cat:"SAR",invest:15,prices:{"25/03/26":25},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/SVI/246.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv01/246/high.webp"},
   {id:66,name:"REGIDRAG O V",ref:"184/195",set:"SIT FR",cat:"SAR",invest:15,prices:{"25/03/26":25},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/SIT/184.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/swsh/swsh12/184/high.webp"},
   {id:67,name:"PALMVAL EX",ref:"260/193",set:"PAL FR",cat:"SAR",invest:15,prices:{"25/03/26":15},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/PAL/260.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv02/260/high.webp"},
   {id:68,name:"PIKACHU VMAX TG",ref:"TG17/TG30",set:"BRS FR",cat:"TG",invest:54,prices:{"23/02/25":65,"25/03/26":67},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/BRS/TG17.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/swsh/swsh9/TG17/high.webp"},
   {id:69,name:"BRASÉGALI VMAX TG",ref:"TG15/TG30",set:"AST FR",cat:"TG",invest:20,prices:{"30/03/24":15,"23/02/25":30,"25/03/26":26},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/AST/TG15.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/swsh/swsh10/TG15/high.webp"},
   {id:70,name:"MEW GG",ref:"GG10/GG20",set:"CRZ FR",cat:"TG",invest:7,prices:{"30/03/24":7.5,"25/03/26":31},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/CRZ/GG10.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/swsh/swsh12pt5/GG10/high.webp"},
   {id:71,name:"DEOXYS GG",ref:"GG12/GG20",set:"CRZ FR",cat:"TG",invest:4,prices:{"30/03/24":3.5,"25/03/26":16},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/CRZ/GG12.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/swsh/swsh12pt5/GG12/high.webp"},
   {id:72,name:"DRACAUFEU TG",ref:"TG03/TG30",set:"BRS FR",cat:"TG",invest:9,prices:{"30/03/24":10,"25/03/26":20},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/BRS/TG03.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/swsh/swsh9/TG03/high.webp"},
   {id:73,name:"CORVAILLUS VMAX TG",ref:"TG19/TG30",set:"BRS FR",cat:"TG",invest:11,prices:{"30/03/24":12,"23/02/25":12,"25/03/26":13},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/BRS/TG19.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/swsh/swsh9/TG19/high.webp"},
   {id:74,name:"ÉTHERNATOS VMAX TG",ref:"TG22/TG30",set:"BRS FR",cat:"TG",invest:8,prices:{"30/03/24":15,"23/02/25":15,"25/03/26":13},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/BRS/TG22.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/swsh/swsh9/TG22/high.webp"},
   {id:75,name:"SHIFOURS VMAX TG",ref:"TG21/TG30",set:"BRS FR",cat:"TG",invest:10,prices:{"30/03/24":14,"23/02/25":13,"25/03/26":15},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/BRS/TG21.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/swsh/swsh9/TG21/high.webp"},
   // ── AR ──
   {id:76,name:"GROUDON AR",ref:"199/182",set:"PAR FR",cat:"AR",invest:null,prices:{"30/03/24":90,"25/03/26":140},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/PAR/199.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv04/199/high.webp"},
   {id:77,name:"ARTIKODIN AR",ref:"161/159",set:"JTG FR",cat:"AR",invest:null,prices:{"25/03/26":72},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/JTG/161.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv09/161/high.webp"},
   {id:78,name:"TYRANOCIF AR",ref:"222/193",set:"PAL FR",cat:"AR",invest:40,prices:{"30/03/24":35,"25/03/26":60},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/PAL/222.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv02/222/high.webp"},
   {id:79,name:"FEUNARD AR",ref:"199/197",set:"OBF FR",cat:"AR",invest:19.5,prices:{"30/03/24":17,"25/03/26":35},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/OBF/199.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv03/199/high.webp"},
   {id:80,name:"YVELTAL AR",ref:"205/182",set:"PAR FR",cat:"AR",invest:null,prices:{"30/03/24":13,"25/03/26":32},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/PAR/205.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv04/205/high.webp"},
   {id:81,name:"MAGIRÊVE AR",ref:"212/193",set:"PAL FR",cat:"AR",invest:10,prices:{"25/03/26":27},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/PAL/212.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv02/212/high.webp"},
   {id:82,name:"SIMULARBR AR",ref:"219/193",set:"PAL FR",cat:"AR",invest:9,prices:{"30/03/24":9.5,"25/03/26":25},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/PAL/219.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv02/219/high.webp"},
   {id:83,name:"INCISACHE AR",ref:"077/064",set:"SFA FR",cat:"AR",invest:11,prices:{"25/03/26":22},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/SFA/077.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv06pt5/077/high.webp"},
   {id:84,name:"STEELIX AR",ref:"208/182",set:"PAR FR",cat:"AR",invest:19.9,prices:{"30/03/24":27,"25/03/26":25},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/PAR/208.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv04/208/high.webp"},
   {id:85,name:"BABIMANTA AR",ref:"189/182",set:"PAR FR",cat:"AR",invest:11,prices:{"25/03/26":18},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/PAR/189.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv04/189/high.webp"},
   {id:86,name:"CIZAYOX AR",ref:"205/197",set:"OBF FR",cat:"AR",invest:5,prices:{"30/03/24":7.5,"25/03/26":18},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/OBF/205.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv03/205/high.webp"},
   {id:87,name:"SCARABRUTE AR",ref:"168/167",set:"TWN FR",cat:"AR",invest:9,prices:{"25/03/26":14},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/TWN/168.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv07pt5/168/high.webp"},
   {id:88,name:"PHIONE AR",ref:"175/167",set:"TWM FR",cat:"AR",invest:8,prices:{"25/03/26":14},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/TWM/175.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv06/175/high.webp"},
   {id:89,name:"TAUROS DE PALDEA AR",ref:"218/193",set:"PAL FR",cat:"AR",invest:13.5,prices:{"30/03/24":15,"25/03/26":25},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/PAL/218.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv02/218/high.webp"},
   {id:90,name:"SHAOFOUINE AR",ref:"200/182",set:"PAR FR",cat:"AR",invest:9,prices:{"30/03/24":10,"25/03/26":14},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/PAR/200.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv04/200/high.webp"},
   {id:91,name:"MATOURGEON AR",ref:"197/193",set:"PAL FR",cat:"AR",invest:8,prices:{"30/03/24":10,"25/03/26":11},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/PAL/197.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv02/197/high.webp"},
   {id:92,name:"FAMIGNOL AR",ref:"226/193",set:"PAL FR",cat:"AR",invest:null,prices:{"30/03/24":14,"25/03/26":28},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/PAL/226.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv02/226/high.webp"},
   // ── 151 ──
   {id:93,name:"SALAMÈCHE AR",ref:"168/165",set:"151 FR",cat:"151",invest:null,prices:{"30/03/24":46,"30/03/25":60,"26/02/26":85,"25/03/26":150},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/MEW/168.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv03pt5/168/high.webp"},
   {id:94,name:"REPTINCEL AR",ref:"169/165",set:"151 FR",cat:"151",invest:null,prices:{"30/03/24":52,"30/03/25":40,"26/02/26":55,"25/03/26":105},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/MEW/169.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv03pt5/169/high.webp"},
   {id:95,name:"TÊTARTE AR",ref:"176/165",set:"151 FR",cat:"151",invest:null,prices:{"30/03/24":24,"30/03/25":30,"26/02/26":27,"25/03/26":95},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/MEW/176.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv03pt5/176/high.webp"},
   {id:96,name:"BULBIZARRE AR",ref:"166/165",set:"151 FR",cat:"151",invest:null,prices:{"30/03/24":44,"30/03/25":40,"26/02/26":55,"25/03/26":95},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/MEW/166.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv03pt5/166/high.webp"},
   {id:97,name:"PIKACHU AR",ref:"173/165",set:"151 FR",cat:"151",invest:null,prices:{"30/03/24":35,"30/03/25":50,"26/02/26":62,"25/03/26":90},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/MEW/173.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv03pt5/173/high.webp"},
   {id:98,name:"CARAPUCE AR",ref:"170/165",set:"151 FR",cat:"151",invest:null,prices:{"30/03/24":47,"30/03/25":55,"26/02/26":60,"25/03/26":83},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/MEW/170.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv03pt5/170/high.webp"},
   {id:99,name:"HERBIZARRE AR",ref:"167/165",set:"151 FR",cat:"151",invest:37,prices:{"30/03/24":40,"30/03/25":43,"26/02/26":45,"25/03/26":83},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/MEW/167.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv03pt5/167/high.webp"},
   {id:100,name:"CARABAFFE AR",ref:"171/165",set:"151 FR",cat:"151",invest:null,prices:{"30/03/24":39,"30/03/25":44,"26/02/26":55,"25/03/26":88},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/MEW/171.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv03pt5/171/high.webp"},
   {id:101,name:"DRACO AR",ref:"181/165",set:"151 FR",cat:"151",invest:30,prices:{"30/03/24":40,"30/03/25":45,"26/02/26":60,"25/03/26":83},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/MEW/181.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv03pt5/181/high.webp"},
   {id:102,name:"FLORIZARRE EX SAR",ref:"198/165",set:"151 FR",cat:"151",invest:45,prices:{"30/03/24":75,"30/03/25":80,"26/02/26":100,"25/03/26":180},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/MEW/198.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv03pt5/198/high.webp"},
   {id:103,name:"ÉLECTHOR EX SAR",ref:"202/165",set:"151 FR",cat:"151",invest:65,prices:{"30/03/24":76,"30/03/25":80,"26/02/26":135,"25/03/26":190},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/MEW/202.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv03pt5/202/high.webp"},
   {id:104,name:"TORTANK EX SAR",ref:"200/165",set:"151 FR",cat:"151",invest:null,prices:{"30/03/24":69,"30/03/25":80,"26/02/26":120,"25/03/26":175},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/MEW/200.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv03pt5/200/high.webp"},
   {id:105,name:"ALAKAZAM EX SAR",ref:"201/165",set:"151 FR",cat:"151",invest:null,prices:{"30/03/24":62,"30/03/25":67,"26/02/26":85,"25/03/26":180},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/MEW/201.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv03pt5/201/high.webp"},
   {id:106,name:"MEW EX SAR PROMO",ref:"053",set:"151 FR PROMO",cat:"151",invest:null,prices:{"30/03/24":28,"30/03/25":50,"26/02/26":95,"25/03/26":100},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/MEW/053.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv03pt5/053/high.webp"},
   {id:107,name:"MEWTWO AR PROMO",ref:"052",set:"151 FR PROMO",cat:"151",invest:null,prices:{"30/03/24":17,"30/03/25":30,"26/02/26":70,"25/03/26":65},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/MEW/052.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv03pt5/052/high.webp"},
   {id:108,name:"PSYKOKWAK AR",ref:"175/165",set:"151 FR",cat:"151",invest:null,prices:{"30/03/24":20,"30/03/25":26,"26/02/26":30,"25/03/26":44},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/MEW/175.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv03pt5/175/high.webp"},
   {id:109,name:"DRACAUFEU EX FA",ref:"183/165",set:"151 FR",cat:"151",invest:null,prices:{"30/03/24":115,"30/03/25":95,"26/02/26":60,"25/03/26":70},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/MEW/183.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv03pt5/183/high.webp"},
   {id:110,name:"MEW EX FA",ref:"193/165",set:"151 FR",cat:"151",invest:null,prices:{"30/03/24":50,"30/03/25":50,"26/02/26":35,"25/03/26":37},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/MEW/193.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv03pt5/193/high.webp"},
   // ── EX ancienne ère ──
   {id:111,name:"GARDEVOIR EX XY",ref:"116/114",set:"XY FR",cat:"EX",invest:55,prices:{"25/03/26":110},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/XY1/116.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/xy/xy1/116/high.webp"},
   {id:112,name:"KYOGRE EX",ref:"6/34",set:"XY1 FR",cat:"EX",invest:20,prices:{"25/03/26":200},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/XYPR/6.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/xy/xyp/6/high.webp"},
   {id:113,name:"MÉGA LOCKPIN EX",ref:"128/094",set:"XY3 FR",cat:"EX",invest:25,prices:{"25/03/26":25},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/FLF/128.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/xy/xy3/128/high.webp"},
   {id:114,name:"MÉGA SHARPEDO EX",ref:"127/094",set:"XY3 FR",cat:"EX",invest:30,prices:{"25/03/26":40},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/FLF/127.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/xy/xy3/127/high.webp"},
   {id:115,name:"M RAYQUAZA EX 25ANS",ref:"76/108",set:"XY6 25ANS FR",cat:"EX",invest:34.9,prices:{"30/03/24":35,"23/02/25":40,"25/03/26":110},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/RSK/76.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/xy/xy6/76/high.webp"},
   {id:116,name:"VOLCANION EX",ref:"182/159",set:"JTG FR",cat:"EX",invest:30,prices:{"25/03/26":40},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/JTG/182.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sv/sv09/182/high.webp"},
   {id:117,name:"DRACAUFEU GX",ref:"20/147",set:"SM3 FR",cat:"GX",invest:16.9,prices:{"30/03/24":16,"23/02/25":16,"25/03/26":19},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/BS/20.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/sm/sm35/20/high.webp"},
   // ── Vintage / Légende ──
   {id:118,name:"LUGIA LÉGENDE COMPLET",ref:"—",set:"HS FR",cat:"VINTAGE",invest:50,prices:{"25/03/26":170},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/HS/113.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/hgss/hgss1/113/high.webp"},
   {id:119,name:"HO-OH LÉGENDE COMPLET",ref:"—",set:"HS FR",cat:"VINTAGE",invest:50,prices:{"25/03/26":170},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/HS/111.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/hgss/hgss1/111/high.webp"},
   {id:120,name:"SUICUNE ENTEI LÉGENDE",ref:"—",set:"HS FR",cat:"VINTAGE",invest:50,prices:{"25/03/26":100},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/HS/115.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/hgss/hgss1/115/high.webp"},
   {id:121,name:"KYOGRE & GROUDON LÉGENDE",ref:"—",set:"HS FR",cat:"VINTAGE",invest:25,prices:{"25/03/26":80},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/HS/87.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/hgss/hgss1/87/high.webp"},
   {id:122,name:"RAIKOU & SUICUNE LÉGENDE",ref:"—",set:"HS FR",cat:"VINTAGE",invest:25,prices:{"25/03/26":70},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/HS/117.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/hgss/hgss1/117/high.webp"},
   {id:123,name:"STELIX PRIME",ref:"87/95",set:"HS FR",cat:"VINTAGE",invest:40,prices:{"30/03/24":40,"23/02/25":40,"25/03/26":50},graded:"PCA 7",
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/HS/87.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/hgss/hgss1/87/high.webp"},
   {id:124,name:"FLORIZARRE 25ANS",ref:"15/102",set:"B&W 25ANS FR",cat:"VINTAGE",invest:19.9,prices:{"30/03/24":17,"23/02/25":17,"25/03/26":30},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/CEL25/15.jpg"},
+   imgUrl:"https://assets.tcgdex.net/fr/swsh/cel25/15/high.webp"},
 ];
 
 // ════════════════════════════════════════════════════
@@ -989,8 +1072,21 @@ const LS_KEY = 'pokedex_gaspard_v3';
 let COLLECTION = [];
 let nextId = 200;
 
+// ── CATEGORIES (extensible) ──
+const DEFAULT_CATEGORIES = [
+  {id:'SAR',label:'SAR / V / VMAX / VSTAR'},
+  {id:'AR',label:'AR'},
+  {id:'TG',label:'TG / GG'},
+  {id:'151',label:'151'},
+  {id:'EX',label:'EX (ancienne ère)'},
+  {id:'GX',label:'GX'},
+  {id:'VINTAGE',label:'Vintage / Légende'},
+  {id:'CHASE',label:'🎯 Chase Card'},
+];
+let CATEGORIES = [];
+
 function saveData() {
-  try { localStorage.setItem(LS_KEY, JSON.stringify({ cards: COLLECTION, nextId })); } catch(e){}
+  try { localStorage.setItem(LS_KEY, JSON.stringify({ cards: COLLECTION, nextId, categories: CATEGORIES })); } catch(e){}
 }
 
 function loadData() {
@@ -1000,11 +1096,31 @@ function loadData() {
       const d = JSON.parse(raw);
       COLLECTION = d.cards || DEFAULT_DATA;
       nextId = d.nextId || 200;
-      return;
+      CATEGORIES = d.categories || JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));
+    } else {
+      COLLECTION = JSON.parse(JSON.stringify(DEFAULT_DATA));
+      nextId = 200;
+      CATEGORIES = JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));
     }
-  } catch(e){}
-  COLLECTION = JSON.parse(JSON.stringify(DEFAULT_DATA));
-  nextId = 200;
+  } catch(e){
+    COLLECTION = JSON.parse(JSON.stringify(DEFAULT_DATA));
+    nextId = 200;
+    CATEGORIES = JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));
+  }
+  // Ensure every card has a location and known category
+  COLLECTION.forEach(c => {
+    if (!c.loc) c.loc = 'maison';
+    if (!CATEGORIES.find(cat=>cat.id===c.cat)) {
+      CATEGORIES.push({id:c.cat, label:c.cat});
+    }
+  });
+  // Ensure CHASE category always exists
+  if (!CATEGORIES.find(cat=>cat.id==='CHASE')) CATEGORIES.push({id:'CHASE',label:'🎯 Chase Card'});
+}
+
+function catLabel(id) {
+  const c = CATEGORIES.find(x=>x.id===id);
+  return c ? c.label : id;
 }
 
 // ════════════════════════════════════════════════════
@@ -1031,6 +1147,7 @@ function deltaIcon(v){ return v>0?'▲':v<0?'▼':'—'; }
 // ════════════════════════════════════════════════════
 let filtered = [];
 let activeCat = 'all';
+let activeLoc = 'all';
 let curPage = 1;
 const PER = 24;
 let viewMode = 'grid';
@@ -1045,12 +1162,16 @@ let chartMode = 'total';
 // ════════════════════════════════════════════════════
 function renderSidebarStats() {
   let tv=0, ti=0;
-  COLLECTION.forEach(c => {
+  const owned = COLLECTION.filter(c=>c.cat!=='CHASE');
+  const chase = COLLECTION.filter(c=>c.cat==='CHASE');
+  owned.forEach(c => {
     const p = latestP(c); if(p) tv += p;
     if(c.invest) ti += c.invest;
   });
   const pnl = tv - ti;
   const r = ti > 0 ? pnl/ti*100 : 0;
+  const banque = owned.filter(c=>c.loc==='banque').length;
+  const maison = owned.filter(c=>c.loc!=='banque').length;
   document.getElementById('sidebarStats').innerHTML = `
     <div class="ss-row"><span class="ss-lbl">Valeur totale</span></div>
     <div class="ss-val">${Math.round(tv).toLocaleString('fr-FR')} €</div>
@@ -1062,9 +1183,14 @@ function renderSidebarStats() {
     <div class="ss-pnl" style="color:${pnl>=0?'var(--teal)':'var(--pink)'}">${pnl>=0?'▲':'▼'} ${Math.abs(Math.round(pnl)).toLocaleString('fr-FR')} € (${fPct(r)})</div>
     <div style="height:8px"></div>
     <div class="ss-row">
-      <span class="ss-lbl">${COLLECTION.length} cartes</span>
-      <span class="ss-lbl">${COLLECTION.filter(c=>c.graded).length} gradées</span>
+      <span class="ss-lbl">${owned.length} cartes</span>
+      <span class="ss-lbl">${owned.filter(c=>c.graded).length} gradées</span>
     </div>
+    <div class="ss-row">
+      <span class="ss-lbl">🏠 ${maison}</span>
+      <span class="ss-lbl">🏦 ${banque}</span>
+    </div>
+    ${chase.length ? `<div style="height:8px"></div><div class="ss-row"><span class="ss-lbl">🎯 Chase list</span><span class="ss-lbl">${chase.length}</span></div>` : ''}
   `;
 }
 
@@ -1077,16 +1203,15 @@ function applyFilters() {
   filtered = COLLECTION.filter(c => {
     const ms = !q || c.name.toLowerCase().includes(q) || c.ref.toLowerCase().includes(q) || c.set.toLowerCase().includes(q);
     let mf = true;
-    if (activeCat==='SAR') mf = c.cat==='SAR';
-    else if (activeCat==='TG') mf = c.cat==='TG';
-    else if (activeCat==='AR') mf = c.cat==='AR';
-    else if (activeCat==='151') mf = c.cat==='151';
-    else if (activeCat==='EX') mf = c.cat==='EX' || c.cat==='GX';
-    else if (activeCat==='VINTAGE') mf = c.cat==='VINTAGE';
-    else if (activeCat==='profit') { const x=chgTotal(c); mf=x!==null&&x>0; }
-    else if (activeCat==='loss') { const x=chgTotal(c); mf=x!==null&&x<0; }
-    else if (activeCat==='graded') mf = !!c.graded;
-    return ms && mf;
+    if (activeCat==='all') mf = c.cat!=='CHASE';
+    else if (activeCat==='profit') { const x=chgTotal(c); mf=x!==null&&x>0 && c.cat!=='CHASE'; }
+    else if (activeCat==='loss') { const x=chgTotal(c); mf=x!==null&&x<0 && c.cat!=='CHASE'; }
+    else if (activeCat==='graded') mf = !!c.graded && c.cat!=='CHASE';
+    else mf = c.cat===activeCat;
+    let ml = true;
+    if (activeLoc==='maison') ml = c.loc!=='banque';
+    else if (activeLoc==='banque') ml = c.loc==='banque';
+    return ms && mf && ml;
   });
   filtered.sort((a,b) => {
     if(srt==='val_d') return (latestP(b)||0)-(latestP(a)||0);
@@ -1103,9 +1228,65 @@ function applyFilters() {
 
 function setCat(c, el) {
   activeCat = c;
-  document.querySelectorAll('.chip').forEach(b => b.classList.remove('on'));
+  document.querySelectorAll('#chipsRowCat .chip').forEach(b => b.classList.remove('on'));
   el.classList.add('on');
   applyFilters();
+}
+
+function setLoc(l, el) {
+  activeLoc = l;
+  document.querySelectorAll('#chipsRowLoc .chip').forEach(b => b.classList.remove('on'));
+  el.classList.add('on');
+  applyFilters();
+}
+
+// ════════════════════════════════════════════════════
+// CHIPS (catégories + localisation, dynamiques)
+// ════════════════════════════════════════════════════
+function renderChips() {
+  const catRow = document.getElementById('chipsRowCat');
+  let h = `<span class="chip${activeCat==='all'?' on':''}" onclick="setCat('all',this)">Toutes</span>`;
+  CATEGORIES.filter(c=>c.id!=='CHASE').forEach(c => {
+    h += `<span class="chip${activeCat===c.id?' on':''}" onclick="setCat('${c.id}',this)">${c.label}</span>`;
+  });
+  h += `<span class="chip${activeCat==='profit'?' on':''}" onclick="setCat('profit',this)">📈 En hausse</span>`;
+  h += `<span class="chip${activeCat==='loss'?' on':''}" onclick="setCat('loss',this)">📉 En baisse</span>`;
+  h += `<span class="chip${activeCat==='graded'?' on':''}" onclick="setCat('graded',this)">🏆 Gradées</span>`;
+  h += `<span class="chip${activeCat==='CHASE'?' on':''}" style="border-color:var(--gold);color:var(--gold)" onclick="setCat('CHASE',this)">🎯 Chase Cards</span>`;
+  h += `<span class="chip chip-add" onclick="addCategory()">＋ Catégorie</span>`;
+  catRow.innerHTML = h;
+
+  const locRow = document.getElementById('chipsRowLoc');
+  locRow.innerHTML = `
+    <span class="chip${activeLoc==='all'?' on':''}" onclick="setLoc('all',this)">Toutes localisations</span>
+    <span class="chip${activeLoc==='maison'?' on':''}" onclick="setLoc('maison',this)">🏠 Chez moi</span>
+    <span class="chip${activeLoc==='banque'?' on':''}" onclick="setLoc('banque',this)">🏦 En banque</span>
+  `;
+}
+
+function addCategory() {
+  const name = prompt('Nom de la nouvelle catégorie (ex: "Promo Center", "Chromatiques"...) :');
+  if (!name || !name.trim()) return;
+  const label = name.trim();
+  let id = label.toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^A-Z0-9]+/g,'_').replace(/^_+|_+$/g,'');
+  if (!id) id = 'CAT_' + Date.now();
+  if (CATEGORIES.find(c=>c.id===id)) { toast('⚠ Cette catégorie existe déjà'); return; }
+  CATEGORIES.push({id, label});
+  saveData();
+  renderChips();
+  populateCategorySelects();
+  toast(`✓ Catégorie "${label}" ajoutée`);
+}
+
+function populateCategorySelects() {
+  const opts = CATEGORIES.map(c=>`<option value="${c.id}">${c.label}</option>`).join('');
+  ['f-cat','moveCat'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    const cur = sel.value;
+    sel.innerHTML = opts;
+    if (cur && CATEGORIES.find(c=>c.id===cur)) sel.value = cur;
+  });
 }
 
 // ════════════════════════════════════════════════════
@@ -1133,19 +1314,23 @@ function renderGrid() {
   const page = filtered.slice((curPage-1)*PER, curPage*PER);
   const el = document.getElementById('gridView');
   if (!page.length) { el.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="e-ico">🔍</div><p>Aucune carte trouvée</p></div>'; return; }
-  el.innerHTML = page.map(c => {
+  el.innerHTML = page.map((c,i) => {
     const p = latestP(c), ch = chgTotal(c), r = roi(c);
-    const deltaStr = ch!==null ? `<span class="tile-delta ${deltaCls(ch)}">${deltaIcon(ch)} ${Math.abs(ch).toFixed(0)}%</span>` : '';
-    const badge = c.invest===null ? '<span class="tile-badge badge-pack">PACKÉ</span>' : c.graded ? `<span class="tile-badge badge-grade">${c.graded}</span>` : '';
-    const roiStr = r!==null ? `<span class="card-roi ${pillCls(r)}" style="font-size:9px">${fPct(r)} ROI</span>` : '';
-    return `<div class="card-tile" onclick="openModal(${c.id})">
+    const isChase = c.cat==='CHASE';
+    const deltaStr = (ch!==null && !isChase) ? `<span class="tile-delta ${deltaCls(ch)}">${deltaIcon(ch)} ${Math.abs(ch).toFixed(0)}%</span>` : '';
+    const badge = isChase ? '<span class="tile-badge" style="background:var(--gold);color:#000">🎯 CHASE</span>' : c.invest===null ? '<span class="tile-badge badge-pack">PACKÉ</span>' : c.graded ? `<span class="tile-badge badge-grade">${c.graded}</span>` : '';
+    const roiStr = (r!==null && !isChase) ? `<span class="card-roi ${pillCls(r)}" style="font-size:9px">${fPct(r)} ROI</span>` : '';
+    const locIcon = c.loc==='banque' ? '🏦' : '🏠';
+    return `<div class="card-tile${isChase?' chase-tile':''}" style="animation-delay:${(i%PER)*0.025}s" onclick="openModal(${c.id})">
       <div class="card-img-wrap">
-        ${c.imgUrl ? `<img src="${c.imgUrl}" alt="${c.name}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` : ''}
+        ${c.imgUrl ? `<img src="${c.imgUrl}" alt="${c.name}" loading="lazy"
+          onerror="if(this.src.endsWith('.webp')){this.src=this.src.replace('high.webp','high.png');}else{this.style.display='none';this.nextElementSibling.style.display='flex';}">` : ''}
         <div class="card-img-placeholder" style="${c.imgUrl?'display:none':''}">
           <div class="ball">⚡</div>
           <div style="font-size:9px;padding:0 8px;text-align:center">${c.name}</div>
         </div>
         ${badge}${deltaStr}
+        <span class="loc-pill" title="${c.loc==='banque'?'En banque':'Chez moi'}">${locIcon}</span>
       </div>
       <div class="card-foot">
         <div class="card-name">${c.name}</div>
@@ -1166,18 +1351,21 @@ function renderList() {
   const page = filtered.slice((curPage-1)*PER, curPage*PER);
   const el = document.getElementById('tblBody');
   if (!page.length) { el.innerHTML = '<tr><td colspan="8" class="empty-state"><div class="e-ico">🔍</div><p>Aucune carte trouvée</p></td></tr>'; return; }
-  el.innerHTML = page.map(c => {
+  el.innerHTML = page.map((c,i) => {
     const p=latestP(c), r=roi(c), ch=chgTotal(c);
-    const thumb = c.imgUrl ? `<img class="t-thumb" src="${c.imgUrl}" alt="${c.name}" onerror="this.style.background='var(--lift)';this.src=''">` : `<div class="t-thumb" style="display:flex;align-items:center;justify-content:center;font-size:18px;opacity:.2">⚡</div>`;
-    const invest = c.invest===null ? '<span class="pill pill-gold">PACKÉ</span>' : fEur(c.invest);
+    const isChase = c.cat==='CHASE';
+    const thumb = c.imgUrl ? `<img class="t-thumb" src="${c.imgUrl}" alt="${c.name}"
+      onerror="if(this.src.endsWith('.webp')){this.src=this.src.replace('high.webp','high.png');}else{this.style.background='var(--lift)';this.src='';}">` : `<div class="t-thumb" style="display:flex;align-items:center;justify-content:center;font-size:18px;opacity:.2">⚡</div>`;
+    const invest = isChase ? '<span class="pill" style="background:rgba(245,200,66,.15);color:var(--gold)">🎯 CHASE</span>' : c.invest===null ? '<span class="pill pill-gold">PACKÉ</span>' : fEur(c.invest);
     const graded = c.graded ? `<span class="pill" style="background:rgba(68,102,255,.15);color:#88aaff">${c.graded}</span>` : '—';
-    return `<tr onclick="openModal(${c.id})">
+    const locIcon = c.loc==='banque' ? '🏦 Banque' : '🏠 Maison';
+    return `<tr style="animation-delay:${(i%PER)*0.02}s" onclick="openModal(${c.id})">
       <td>${thumb}</td>
-      <td><div class="t-name">${c.name}</div><div class="t-sub">${c.ref} · ${c.set}</div></td>
+      <td><div class="t-name">${c.name}</div><div class="t-sub">${c.ref} · ${c.set} · ${catLabel(c.cat)} · ${locIcon}</div></td>
       <td>${invest}</td>
       <td class="t-price">${p?Math.round(p)+' €':'—'}</td>
-      <td class="hm">${r!==null?`<span class="pill ${pillCls(r)}">${fPct(r)}</span>`:'—'}</td>
-      <td class="hm">${ch!==null?`<span class="pill ${pillCls(ch)}">${fPct(ch)}</span>`:'—'}</td>
+      <td class="hm">${(r!==null&&!isChase)?`<span class="pill ${pillCls(r)}">${fPct(r)}</span>`:'—'}</td>
+      <td class="hm">${(ch!==null&&!isChase)?`<span class="pill ${pillCls(ch)}">${fPct(ch)}</span>`:'—'}</td>
       <td class="hm">${graded}</td>
       <td><a href="${cmUrl(c)}" target="_blank" onclick="event.stopPropagation()" style="color:var(--blue);font-size:10px;text-decoration:none;white-space:nowrap">CM NM FR ↗</a></td>
     </tr>`;
@@ -1206,7 +1394,13 @@ function openModal(id) {
   const c = COLLECTION.find(x=>x.id===id);
   if (!c) return;
   document.getElementById('mTitle').textContent = c.name + (c.graded ? ` [${c.graded}]` : '');
-  document.getElementById('mRef').textContent = `${c.ref} · ${c.set}${c.invest?' · Acheté '+fEur(c.invest):' · PACKÉ'}`;
+  const locTxt = c.loc==='banque' ? '🏦 En banque' : '🏠 Chez moi';
+  const investTxt = c.cat==='CHASE' ? ' · 🎯 Chase Card (recherche)' : (c.invest?' · Acheté '+fEur(c.invest):' · PACKÉ');
+  document.getElementById('mRef').textContent = `${c.ref} · ${c.set} · ${catLabel(c.cat)} · ${locTxt}${investTxt}`;
+  // Move selects
+  populateCategorySelects();
+  document.getElementById('moveCat').value = c.cat;
+  document.getElementById('moveLoc').value = c.loc || 'maison';
   // Image
   const img = document.getElementById('modalImg');
   const ph  = document.getElementById('modalImgPlaceholder');
@@ -1214,7 +1408,13 @@ function openModal(id) {
   document.getElementById('imgUrlInp').value = c.imgUrl || '';
   if (c.imgUrl) {
     img.src = c.imgUrl; img.style.display='block'; ph.style.display='none';
-    img.onerror = () => { img.style.display='none'; ph.style.display='flex'; };
+    img.onerror = () => {
+      if (img.src.endsWith('.webp')) {
+        img.src = img.src.replace('high.webp', 'high.png');
+      } else {
+        img.style.display='none'; ph.style.display='flex';
+      }
+    };
   } else { img.style.display='none'; ph.style.display='flex'; }
   // Prices
   renderModalPrices(c);
@@ -1234,19 +1434,36 @@ function openModal(id) {
   document.body.style.overflow = 'hidden';
 }
 
-function renderModalPrices(c) {
+function renderModalPrices(c, flashDate) {
   const dates = sortedDates(c.prices);
   document.getElementById('mPrices').innerHTML = dates.map((d,i) => {
     const v = c.prices[d];
     const prev = i>0 ? c.prices[dates[i-1]] : null;
     const delta = prev ? (v-prev)/prev*100 : null;
-    return `<div class="ph-item editable" onclick="editPriceInline(this,'${d}',${v},${c.id})">
+    return `<div class="ph-item editable${d===flashDate?' flash':''}" onclick="editPriceInline(this,'${d}',${v},${c.id})">
       <div class="ph-date">${d}</div>
       <div class="ph-val">${Math.round(v)} €</div>
       ${delta!==null?`<div class="ph-delta" style="color:var(--${delta>=0?'teal':'pink'})">${deltaIcon(delta)} ${Math.abs(delta).toFixed(1)}%</div>`:''}
       <div class="ph-edit-hint">✎ cliquer pour modifier</div>
     </div>`;
   }).join('');
+}
+
+// ════════════════════════════════════════════════════
+// MOVE CARD (catégorie / localisation)
+// ════════════════════════════════════════════════════
+function applyMove() {
+  const c = COLLECTION.find(x=>x.id===openCardId);
+  if (!c) return;
+  const newCat = document.getElementById('moveCat').value;
+  const newLoc = document.getElementById('moveLoc').value;
+  c.cat = newCat;
+  c.loc = newLoc;
+  saveData();
+  applyFilters();
+  renderSidebarStats();
+  document.getElementById('mRef').textContent = `${c.ref} · ${c.set} · ${catLabel(c.cat)} · ${c.loc==='banque'?'🏦 En banque':'🏠 Chez moi'}${c.cat==='CHASE'?' · 🎯 Chase Card (recherche)':(c.invest?' · Acheté '+fEur(c.invest):' · PACKÉ')}`;
+  toast(`✓ ${c.name} déplacée → ${catLabel(newCat)} / ${newLoc==='banque'?'Banque':'Maison'}`);
 }
 
 function editPriceInline(el, date, currentVal, cardId) {
@@ -1269,7 +1486,7 @@ function savePriceEdit(date, cardId, inp) {
   if (!c) return;
   c.prices[date] = val;
   saveData();
-  renderModalPrices(c);
+  renderModalPrices(c, date);
   buildMiniChart(c);
   renderView();
   renderSidebarStats();
@@ -1289,7 +1506,7 @@ function addPriceEntry() {
   if (!c) return;
   c.prices[date] = val;
   saveData();
-  renderModalPrices(c);
+  renderModalPrices(c, date);
   buildMiniChart(c);
   renderView();
   renderSidebarStats();
@@ -1309,8 +1526,13 @@ function applyImgUrl() {
   c.imgUrl = url || null;
   saveData();
   const img=document.getElementById('modalImg'), ph=document.getElementById('modalImgPlaceholder');
-  if (url) { img.src=url; img.style.display='block'; ph.style.display='none'; img.onerror=()=>{img.style.display='none';ph.style.display='flex';}; }
-  else { img.style.display='none'; ph.style.display='flex'; }
+  if (url) {
+    img.src=url; img.style.display='block'; ph.style.display='none';
+    img.onerror=()=>{
+      if(img.src.endsWith('.webp')){img.src=img.src.replace('high.webp','high.png');}
+      else{img.style.display='none';ph.style.display='flex';}
+    };
+  }  else { img.style.display='none'; ph.style.display='flex'; }
   renderView();
   toast('✓ Image mise à jour');
 }
@@ -1324,6 +1546,9 @@ function deleteCard(id) {
 }
 
 function buildMiniChart(c) {
+  const dates0 = sortedDates(c.prices);
+  document.getElementById('miniChartSection').style.display = dates0.length ? 'block' : 'none';
+  if (!dates0.length) { if (miniChartObj) { miniChartObj.destroy(); miniChartObj=null; } return; }
   const ctx = document.getElementById('miniChart').getContext('2d');
   if (miniChartObj) miniChartObj.destroy();
   const dates = sortedDates(c.prices);
@@ -1442,6 +1667,9 @@ function onFormChange() {
   const ref=document.getElementById('f-ref').value.trim();
   const set=document.getElementById('f-set').value.trim();
   const imgUrl=document.getElementById('f-imgurl').value.trim();
+  const cat=document.getElementById('f-cat').value;
+  const lbl=document.getElementById('f-price-label');
+  if (lbl) lbl.textContent = cat==='CHASE' ? 'Prix cible / estimé (€) — optionnel' : 'Prix NM France actuel (€) *';
   const preview=document.getElementById('formPreview');
   if (!name) { preview.style.display='none'; return; }
   preview.style.display='block';
@@ -1458,13 +1686,16 @@ function addCard() {
   const ref=document.getElementById('f-ref').value.trim()||'—';
   const set=document.getElementById('f-set').value.trim()||'—';
   const cat=document.getElementById('f-cat').value;
+  const loc=document.getElementById('f-loc').value;
   const invest=parseFloat(document.getElementById('f-invest').value)||null;
   const price=parseFloat(document.getElementById('f-price').value)||null;
   const grade=document.getElementById('f-grade').value.trim()||null;
   const date=document.getElementById('f-date').value.trim()||todayStr();
   const imgUrl=document.getElementById('f-imgurl').value.trim()||null;
-  if (!name||!price) { toast('⚠ Nom et prix actuel requis'); return; }
-  const card={id:nextId++,name,ref,set,cat,invest,prices:{[date]:price},graded:grade,imgUrl};
+  if (!name) { toast('⚠ Le nom est requis'); return; }
+  if (cat!=='CHASE' && !price) { toast('⚠ Nom et prix actuel requis'); return; }
+  const prices = price ? {[date]:price} : {};
+  const card={id:nextId++,name,ref,set,cat,loc,invest,prices,graded:grade,imgUrl};
   COLLECTION.unshift(card);
   saveData();
   renderSidebarStats();
@@ -1477,9 +1708,12 @@ function addCard() {
 function clearAddForm() {
   ['f-name','f-ref','f-set','f-invest','f-price','f-grade','f-imgurl'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('f-date').value=todayStr();
+  populateCategorySelects();
   document.getElementById('f-cat').value='SAR';
+  document.getElementById('f-loc').value='maison';
   document.getElementById('formPreview').style.display='none';
   document.getElementById('addOk').style.display='none';
+  onFormChange();
 }
 
 // ════════════════════════════════════════════════════
@@ -1512,7 +1746,11 @@ function toast(msg, dur=4000) {
 // ════════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
   loadData();
+  renderChips();
+  populateCategorySelects();
   document.getElementById('f-date').value = todayStr();
+  document.getElementById('f-cat').value = 'SAR';
+  document.getElementById('f-loc').value = 'maison';
   renderSidebarStats();
   showSection('collection');
 });
