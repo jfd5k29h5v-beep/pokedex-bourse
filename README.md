@@ -1,13 +1,9 @@
-[pokemon_tracker_iphone.html](https://github.com/user-attachments/files/29059716/pokemon_tracker_iphone.html)
+[index.html](https://github.com/user-attachments/files/29059752/index.html)
 <!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#0d0d14">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Pokédex Bourse">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pokédex Bourse — Gaspard</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -423,191 +419,20 @@ select.finp { cursor: pointer; }
 .empty-state .e-ico { font-size: 48px; opacity: 0.2; margin-bottom: 12px; }
 .empty-state p { font-size: 11px; }
 
-/* ── BOTTOM NAV (mobile only) ───────────────────────── */
-.bottom-nav {
-  display: none; /* hidden on desktop */
-}
-
 /* ── MOBILE ─────────────────────────────────────────── */
 @media (max-width: 900px) {
-  /* Hide desktop sidebar */
   .sidebar { display: none; }
-
-  /* Bottom tab bar — iPhone style */
-  .bottom-nav {
-    display: flex;
-    position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
-    background: rgba(13,13,20,0.96);
-    backdrop-filter: blur(16px) saturate(180%);
-    -webkit-backdrop-filter: blur(16px) saturate(180%);
-    border-top: 1px solid var(--rim);
-    padding: 6px 0 max(8px, env(safe-area-inset-bottom));
-    gap: 0;
-  }
-  .bnav-item {
-    flex: 1; display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    gap: 3px; padding: 4px 0;
-    color: var(--dim); font-size: 9px; letter-spacing: 0.5px;
-    text-transform: uppercase; cursor: pointer;
-    transition: color 0.15s;
-    -webkit-tap-highlight-color: transparent;
-    user-select: none;
-  }
-  .bnav-item .bnav-ico { font-size: 20px; line-height: 1; }
-  .bnav-item.active { color: var(--gold); }
-  .bnav-item.active .bnav-ico { filter: drop-shadow(0 0 6px rgba(245,200,66,0.5)); }
-
-  /* Add safe-area padding so content isn't under the bottom nav */
-  .main {
-    padding-bottom: calc(60px + env(safe-area-inset-bottom));
-  }
-
-  /* Topbar: compact, single line */
-  .topbar {
-    padding: 10px 12px;
-    gap: 8px;
-    flex-wrap: nowrap;
-  }
-  .topbar-title {
-    font-size: 16px;
-    letter-spacing: 1px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    min-width: 0;
-  }
-  /* Hide refresh and add buttons from topbar on mobile — actions moved to bottom nav */
-  .topbar .btn-blue,
-  .topbar .btn-gold { display: none; }
-
-  /* Search full width */
-  .search-inp { width: 100% !important; }
-  .search-wrap { flex: 1; min-width: 0; }
-
-  /* Chips: horizontal scroll (no wrap) */
-  .chips {
-    padding: 8px 12px;
-    flex-direction: column !important;
-    gap: 6px;
-  }
-  .chips-row {
-    display: flex;
-    gap: 6px;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    flex-wrap: nowrap !important;
-    padding-bottom: 2px;
-  }
-  .chips-row::-webkit-scrollbar { display: none; }
-  .chip { flex-shrink: 0; padding: 6px 13px; font-size: 11px; }
-
-  /* Sort bar */
-  .sortbar { padding: 8px 12px; gap: 6px; }
-  .sortbar-count { font-size: 10px; }
-
-  /* Grid: 2 columns on iPhone */
-  .grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-  .scroll-area { padding: 12px; }
-
-  /* Card tile: tighter */
-  .card-foot { padding: 8px 9px 9px; }
-  .card-name { font-size: 10px; }
-  .card-ref  { font-size: 8px; }
-  .card-price { font-size: 17px; }
-
-  /* Modal: full screen on mobile */
-  .overlay { padding: 0; align-items: flex-end; }
-  .modal {
-    max-width: 100%;
-    max-height: 94vh;
-    border-radius: 20px 20px 0 0;
-    border-bottom: none;
-    transform: translateY(40px) scale(1) !important; /* override desktop scale */
-  }
-  .overlay.open .modal { transform: translateY(0) scale(1) !important; }
+  .grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
   .modal-layout { flex-direction: column; }
-  .modal-img-col {
-    width: 100%;
-    flex-direction: row;
-    border-right: none;
-    border-bottom: 1px solid var(--rim);
-    border-radius: 20px 20px 0 0;
-    padding: 14px 16px;
-    gap: 14px;
-    align-items: center;
-  }
-  .modal-card-img,
-  .modal-img-placeholder { width: 90px; height: 126px; border-radius: 8px; flex-shrink: 0; }
-  .img-actions { flex: 1; }
-  .img-actions .btn { font-size: 10px; padding: 5px 10px; }
-  .modal-content { padding: 16px; gap: 14px; }
-  .modal-title { font-size: 20px; }
-  .ph-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 6px; }
-  .ph-val { font-size: 15px; }
-  .add-price-row { flex-direction: column; gap: 8px; }
-  .add-price-row .fg { width: 100%; }
-  .add-price-row .btn { width: 100%; justify-content: center; }
-  .move-row { flex-direction: column; gap: 8px; }
-  .move-row .fg { width: 100%; }
-  .move-row .btn { width: 100%; justify-content: center; }
-  .modal-actions {
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  .modal-actions .btn,
-  .modal-actions a.btn {
-    flex: 1 1 calc(50% - 4px);
-    justify-content: center;
-    min-width: 0;
-    font-size: 10px;
-    padding: 8px 10px;
-  }
-
-  /* Form section */
-  .form-section { padding: 0; }
-  .form-card { border-radius: 0; border-left: none; border-right: none; padding: 16px; max-width: 100%; }
-  .form-card h2 { font-size: 18px; margin-bottom: 14px; }
-  .form-grid { grid-template-columns: 1fr; gap: 12px; }
-  .finp { font-size: 16px !important; /* prevents iOS zoom on focus */ padding: 11px 12px; }
-  select.finp { font-size: 16px !important; }
-  .form-actions { flex-direction: column; }
-  .form-actions .btn { width: 100%; justify-content: center; padding: 13px; font-size: 13px; }
-  .notice { font-size: 11px; }
-
-  /* Chart section */
-  .chart-section { padding: 12px; }
-  .chart-card { padding: 14px; }
-  .chart-wrap { height: 220px; }
-  .chart-btns { gap: 4px; }
-
-  /* Pagination */
-  .pagination { padding: 12px; gap: 4px; justify-content: center; }
-  .ppage { width: 34px; height: 34px; font-size: 11px; }
-
-  /* Hide table columns that don't fit */
+  .modal-img-col { width: 100%; flex-direction: row; border-right: none; border-bottom: 1px solid var(--rim); border-radius: 16px 16px 0 0; padding: 16px; }
+  .form-grid { grid-template-columns: 1fr; }
   .hm { display: none; }
-
-  /* Toast above bottom nav */
-  .toast {
-    bottom: calc(70px + env(safe-area-inset-bottom));
-    left: 12px; right: 12px;
-    max-width: none;
-    text-align: center;
-  }
-
-  /* Enlarge tap targets */
-  .chip, .btn, .vtbtn, .ppage { min-height: 36px; }
-  .vtbtn { width: 36px; height: 36px; }
+  .topbar { padding: 10px 14px; }
+  .scroll-area { padding: 14px; }
+  .chips, .sortbar { padding: 10px 14px; }
 }
-
-/* Very small phones */
-@media (max-width: 390px) {
-  .grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-  .scroll-area { padding: 10px; }
-  .card-price { font-size: 15px; }
-  .topbar-title { font-size: 14px; }
+@media (max-width: 600px) {
+  .modal-card-img, .modal-img-placeholder { width: 120px; height: 168px; }
 }
 
 /* ── ANIMATIONS ─────────────────────────────────────── */
@@ -862,26 +687,6 @@ tbody tr { animation: rowIn 0.35s ease both; }
 </div><!-- /main -->
 </div><!-- /app -->
 
-<!-- ── BOTTOM NAV (mobile) ── -->
-<nav class="bottom-nav" id="bottomNav">
-  <div class="bnav-item active" id="bnav-collection" onclick="showSection('collection');setActiveBottomNav('collection')">
-    <span class="bnav-ico">🃏</span>
-    <span>Collection</span>
-  </div>
-  <div class="bnav-item" id="bnav-charts" onclick="showSection('charts');setActiveBottomNav('charts')">
-    <span class="bnav-ico">📈</span>
-    <span>Graphiques</span>
-  </div>
-  <div class="bnav-item" id="bnav-add" onclick="showSection('add');setActiveBottomNav('add')" style="color:var(--gold)">
-    <span class="bnav-ico" style="font-size:26px;margin-top:-2px">＋</span>
-    <span>Ajouter</span>
-  </div>
-  <div class="bnav-item" id="bnav-refresh" onclick="doRefresh()">
-    <span class="bnav-ico" id="refreshIco">↻</span>
-    <span>Actualiser</span>
-  </div>
-</nav>
-
 <!-- ── MODAL ── -->
 <div class="overlay" id="overlay" onclick="maybeCloseModal(event)">
   <div class="modal" id="modal">
@@ -982,258 +787,258 @@ tbody tr { animation: rowIn 0.35s ease both; }
 const DEFAULT_DATA = [
   // ── Les grosses pièces gradées ──
   {id:1,name:"LUGIA V",ref:"186/195",set:"SIT FR",cat:"SAR",invest:185,prices:{"30/03/24":450,"23/02/25":500,"25/03/26":1000},graded:"CA 10",
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/SIT/186.jpg"},
+   imgUrl:"https://images.pokemontcg.io/swsh12/186_hires.png"},
   {id:2,name:"RAYQUAZA VMAX",ref:"218/203",set:"SIT FR",cat:"SAR",invest:700,prices:{"23/02/25":1000,"25/03/26":2000},graded:"CA 10",
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/SIT/218.jpg"},
+   imgUrl:"https://images.pokemontcg.io/swsh12/218_hires.png"},
   {id:3,name:"GIRATINA VSTAR",ref:"GG69/GG70",set:"CRZ FR",cat:"TG",invest:56,prices:{"30/03/24":110,"23/02/25":250,"25/03/26":280},graded:"CA 9.5",
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/CRZ/GG69.jpg"},
+   imgUrl:"https://images.pokemontcg.io/swsh12pt5/GG69_hires.png"},
   {id:4,name:"MEWTWO VSTAR",ref:"GG44/GG70",set:"CRZ FR",cat:"TG",invest:139,prices:{"30/03/24":150,"23/02/25":155,"25/03/26":230},graded:"CA 9.5",
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/CRZ/GG44.jpg"},
+   imgUrl:"https://images.pokemontcg.io/swsh12pt5/GG44_hires.png"},
   {id:5,name:"RAYQUAZA VMAX TG",ref:"TG20/TG30",set:"BRS FR",cat:"TG",invest:65,prices:{"30/03/24":100,"23/02/25":140,"25/03/26":350},graded:"CA 10",
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/BRS/TG20.jpg"},
+   imgUrl:"https://images.pokemontcg.io/swsh9/TG20_hires.png"},
   {id:6,name:"RAIKOU V",ref:"GG41/GG70",set:"CRZ FR",cat:"TG",invest:41,prices:{"30/03/24":32,"23/02/25":45,"25/03/26":100},graded:"CA 10",
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/CRZ/GG41.jpg"},
+   imgUrl:"https://images.pokemontcg.io/swsh12pt5/GG41_hires.png"},
   {id:7,name:"SUICUNE V",ref:"GG38/GG70",set:"CRZ FR",cat:"TG",invest:42,prices:{"23/02/25":75,"25/03/26":170},graded:"CA 9.5",
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/CRZ/GG38.jpg"},
+   imgUrl:"https://images.pokemontcg.io/swsh12pt5/GG38_hires.png"},
   {id:8,name:"MEW V",ref:"251/264",set:"FST FR",cat:"SAR",invest:55,prices:{"30/03/24":80,"23/02/25":95,"25/03/26":130},graded:"CA 8",
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/FST/251.jpg"},
+   imgUrl:"https://images.pokemontcg.io/swsh11/251_hires.png"},
   {id:9,name:"PTÉRA V",ref:"180/196",set:"PAL FR",cat:"SAR",invest:185,prices:{"30/03/24":210,"23/02/25":210,"25/03/26":250},graded:"CA 7",
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/PAL/180.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv2/180_hires.png"},
   {id:10,name:"GARDEVOIR EX",ref:"233/091",set:"DES PAL FR",cat:"SAR",invest:null,prices:{"25/03/26":185},graded:"CA 9.5",
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/PAL/233.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv2/233_hires.png"},
   // ── SAR / VSTAR / VMAX ──
   {id:11,name:"LÉVIATOR EX",ref:"123/122",set:"TEF FR",cat:"SAR",invest:20,prices:{"30/03/24":40,"23/02/25":80,"25/03/26":175},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/TEF/123.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv5/123_hires.png"},
   {id:12,name:"DRATTAK EX",ref:"187/159",set:"JTG FR",cat:"SAR",invest:140,prices:{"25/03/26":250},graded:"CA 10",
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/JTG/187.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv9/187_hires.png"},
   {id:13,name:"ALAKAZAM EX",ref:"125/124",set:"TEF FR",cat:"SAR",invest:80,prices:{"25/03/26":300},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/TEF/125.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv5/125_hires.png"},
   {id:14,name:"MEWTWO EX",ref:"163/162",set:"TEF FR",cat:"SAR",invest:80,prices:{"25/03/26":300},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/TEF/163.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv5/163_hires.png"},
   {id:15,name:"ARCEUS VSTAR",ref:"GG70/GG70",set:"CRZ FR",cat:"TG",invest:55,prices:{"30/03/24":56,"23/02/25":130,"25/03/26":135},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/CRZ/GG70.jpg"},
+   imgUrl:"https://images.pokemontcg.io/swsh12pt5/GG70_hires.png"},
   {id:16,name:"DIALGA ORIGINEL VSTAR",ref:"GG68/GG70",set:"CRZ FR",cat:"TG",invest:25,prices:{"30/03/24":35,"23/02/25":90,"25/03/26":100},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/CRZ/GG68.jpg"},
+   imgUrl:"https://images.pokemontcg.io/swsh12pt5/GG68_hires.png"},
   {id:17,name:"PALKIA ORIGINEL VSTAR",ref:"GG67/GG70",set:"CRZ FR",cat:"TG",invest:38,prices:{"30/03/24":35,"23/02/25":90,"25/03/26":90},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/CRZ/GG67.jpg"},
+   imgUrl:"https://images.pokemontcg.io/swsh12pt5/GG67_hires.png"},
   {id:18,name:"DARKRAI VSTAR",ref:"GG50/GG70",set:"CRZ FR",cat:"TG",invest:30,prices:{"23/02/25":55,"25/03/26":80},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/CRZ/GG50.jpg"},
+   imgUrl:"https://images.pokemontcg.io/swsh12pt5/GG50_hires.png"},
   {id:19,name:"DEOXYS VSTAR",ref:"GG46/GG70",set:"CRZ FR",cat:"TG",invest:22,prices:{"30/03/24":25,"23/02/25":40,"25/03/26":80},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/CRZ/GG46.jpg"},
+   imgUrl:"https://images.pokemontcg.io/swsh12pt5/GG46_hires.png"},
   {id:20,name:"TYRANOCIF V",ref:"155/163",set:"AST FR",cat:"SAR",invest:79,prices:{"30/03/24":130,"23/02/25":130,"25/03/26":138},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/AST/155.jpg"},
+   imgUrl:"https://images.pokemontcg.io/swsh10/155_hires.png"},
   {id:21,name:"DRACAUFEU EX SAR",ref:"223/197",set:"OBF FR",cat:"SAR",invest:80,prices:{"30/03/24":72,"23/02/25":90,"25/03/26":70},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/OBF/223.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv3/223_hires.png"},
   {id:22,name:"DRACAUFEU VSTAR PROMO",ref:"SWSH262",set:"PROMO FR",cat:"SAR",invest:58,prices:{"30/03/24":45,"23/02/25":140,"25/03/26":105},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/PR/SWSH262.jpg"},
+   imgUrl:"https://images.pokemontcg.io/swshp/SWSH262.png"},
   {id:23,name:"AQUALI VMAX PROMO",ref:"SWSH182",set:"PROMO FR",cat:"SAR",invest:38,prices:{"30/03/24":50,"23/02/25":120,"25/03/26":95},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/PR/SWSH182.jpg"},
+   imgUrl:"https://images.pokemontcg.io/swshp/SWSH182.png"},
   {id:24,name:"PALKIA ORIGINEL V",ref:"178/189",set:"AST FR",cat:"SAR",invest:60,prices:{"30/03/24":60,"23/02/25":70,"25/03/26":90},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/AST/178.jpg"},
+   imgUrl:"https://images.pokemontcg.io/swsh10/178_hires.png"},
   {id:25,name:"PINGOLÉON V",ref:"146/163",set:"AST FR",cat:"SAR",invest:45,prices:{"30/03/24":57,"23/02/25":70,"25/03/26":90},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/AST/146.jpg"},
+   imgUrl:"https://images.pokemontcg.io/swsh10/146_hires.png"},
   {id:26,name:"DRACAUFEU EX CLINIQUE",ref:"234/091",set:"DES PAL FR",cat:"SAR",invest:200,prices:{"25/03/26":210},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/PAL/234.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv2/234_hires.png"},
   {id:27,name:"DRACAUFEU V CLINIQUE",ref:"154/172",set:"BRS FR",cat:"SAR",invest:245,prices:{"25/03/26":260},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/BRS/154.jpg"},
+   imgUrl:"https://images.pokemontcg.io/swsh9/154_hires.png"},
   {id:28,name:"MILOBELLUS EX CLINIQUE",ref:"237/191",set:"SSP FR",cat:"SAR",invest:200,prices:{"25/03/26":200},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/SSP/237.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv8/237_hires.png"},
   {id:29,name:"CELEBI V",ref:"245/264",set:"FST FR",cat:"SAR",invest:57,prices:{"30/03/24":65,"23/02/25":79,"25/03/26":85},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/FST/245.jpg"},
+   imgUrl:"https://images.pokemontcg.io/swsh11/245_hires.png"},
   {id:30,name:"BRUYVERNE V",ref:"196/203",set:"SIT FR",cat:"SAR",invest:35.5,prices:{"30/03/24":54,"23/02/25":47,"25/03/26":60},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/SIT/196.jpg"},
+   imgUrl:"https://images.pokemontcg.io/swsh12/196_hires.png"},
   {id:31,name:"DIALGA ORIGINEL V",ref:"177/189",set:"AST FR",cat:"SAR",invest:60,prices:{"30/03/24":60,"23/02/25":60,"25/03/26":62},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/AST/177.jpg"},
+   imgUrl:"https://images.pokemontcg.io/swsh10/177_hires.png"},
   {id:32,name:"ARCEUS V",ref:"166/172",set:"BRS FR",cat:"SAR",invest:65,prices:{"30/03/24":50,"23/02/25":50,"25/03/26":65},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/BRS/166.jpg"},
+   imgUrl:"https://images.pokemontcg.io/swsh9/166_hires.png"},
   {id:33,name:"FEU PERÇANT EX",ref:"204/162",set:"TEF FR",cat:"SAR",invest:90,prices:{"23/02/25":89,"25/03/26":80},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/TEF/204.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv5/204_hires.png"},
   {id:34,name:"VERT-DE-FER EX",ref:"203/162",set:"TEF FR",cat:"SAR",invest:70,prices:{"23/02/25":76,"25/03/26":65},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/TEF/203.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv5/203_hires.png"},
   {id:35,name:"CHEF-DE-FER EX",ref:"206/162",set:"TEF FR",cat:"SAR",invest:70,prices:{"23/02/25":95,"25/03/26":70},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/TEF/206.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv5/206_hires.png"},
   {id:36,name:"GARDE-DE-FER EX",ref:"249/182",set:"PAR FR",cat:"SAR",invest:73,prices:{"23/02/25":73,"25/03/26":45},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/PAR/249.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv4/249_hires.png"},
   {id:37,name:"ALTARIA EX",ref:"253/182",set:"PAR FR",cat:"SAR",invest:90,prices:{"23/02/25":100,"25/03/26":80},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/PAR/253.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv4/253_hires.png"},
   {id:38,name:"FARFUREX EX",ref:"175/189",set:"AST FR",cat:"SAR",invest:20,prices:{"25/03/26":50},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/AST/175.jpg"},
+   imgUrl:"https://images.pokemontcg.io/swsh10/175_hires.png"},
   {id:39,name:"DARDARGNAN V",ref:"167/189",set:"AST FR",cat:"SAR",invest:40,prices:{"23/02/25":50,"25/03/26":50},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/AST/167.jpg"},
+   imgUrl:"https://images.pokemontcg.io/swsh10/167_hires.png"},
   {id:40,name:"MYGAVOLT EX",ref:"168/142",set:"SCR FR",cat:"SAR",invest:null,prices:{"23/02/25":45,"25/03/26":40},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/SCR/168.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv7/168_hires.png"},
   {id:41,name:"KOREAIDON EX",ref:"247/198",set:"SVI FR",cat:"SAR",invest:40,prices:{"23/02/25":36,"25/03/26":30},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/SVI/247.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv1/247_hires.png"},
   {id:42,name:"MIRAIDON EX",ref:"244/198",set:"SVI FR",cat:"SAR",invest:30,prices:{"23/02/25":35,"25/03/26":30},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/SVI/244.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv1/244_hires.png"},
   {id:43,name:"GARDEVOIR EX",ref:"245/198",set:"SVI FR",cat:"SAR",invest:60,prices:{"25/03/26":70},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/SVI/245.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv1/245_hires.png"},
   {id:44,name:"MIASCARADE EX",ref:"256/193",set:"PAL FR",cat:"SAR",invest:20,prices:{"30/03/24":22,"23/02/25":18,"25/03/26":20},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/PAL/256.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv2/256_hires.png"},
   {id:45,name:"CARCHACROK EX",ref:"245/182",set:"PAR FR",cat:"SAR",invest:52,prices:{"30/03/24":44,"23/02/25":45,"25/03/26":40},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/PAR/245.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv4/245_hires.png"},
   {id:46,name:"YUYU EX",ref:"259/193",set:"PAL FR",cat:"SAR",invest:45,prices:{"30/03/24":38,"23/02/25":38,"25/03/26":36},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/PAL/259.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv2/259_hires.png"},
   {id:47,name:"FLAMIGATOR EX",ref:"258/193",set:"PAL FR",cat:"SAR",invest:20,prices:{"23/02/25":20,"25/03/26":20},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/PAL/258.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv2/258_hires.png"},
   {id:48,name:"DINGLU EX",ref:"263/193",set:"PAL FR",cat:"SAR",invest:12,prices:{"25/03/26":12},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/PAL/263.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv2/263_hires.png"},
   {id:49,name:"GENESECT EX",ref:"169/086",set:"SFA FR",cat:"SAR",invest:20,prices:{"25/03/26":35},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/SFA/169.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv6pt5/169_hires.png"},
   {id:50,name:"GENESECT V",ref:"255/264",set:"FST FR",cat:"SAR",invest:20,prices:{"25/03/26":25},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/FST/255.jpg"},
+   imgUrl:"https://images.pokemontcg.io/swsh11/255_hires.png"},
   {id:51,name:"ZACIAN EX",ref:"186/159",set:"JTG FR",cat:"SAR",invest:null,prices:{"25/03/26":55},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/JTG/186.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv9/186_hires.png"},
   {id:52,name:"MÉGA DIANCIE EX",ref:"282/217",set:"TWM FR",cat:"SAR",invest:null,prices:{"25/03/26":110},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/TWM/282.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv6/282_hires.png"},
   {id:53,name:"MÉGA OHMASSACRE",ref:"278/217",set:"TWM FR",cat:"SAR",invest:null,prices:{"25/03/26":45},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/TWM/278.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv6/278_hires.png"},
   {id:54,name:"URSAKING LUNE V.EX",ref:"216/217",set:"TWM FR",cat:"SAR",invest:40,prices:{"25/03/26":35},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/TWM/216.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv6/216_hires.png"},
   {id:55,name:"CORBOSS V",ref:"162/172",set:"BRS FR",cat:"SAR",invest:25,prices:{"30/03/24":20,"23/02/25":22,"25/03/26":19},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/BRS/162.jpg"},
+   imgUrl:"https://images.pokemontcg.io/swsh9/162_hires.png"},
   {id:56,name:"HOOPA V",ref:"GG53/GG70",set:"CRZ FR",cat:"TG",invest:7,prices:{"30/03/24":14,"23/02/25":15,"25/03/26":18},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/CRZ/GG53.jpg"},
+   imgUrl:"https://images.pokemontcg.io/swsh12pt5/GG53_hires.png"},
   {id:57,name:"ZAMAZENTA V GG",ref:"GG54/GG70",set:"CRZ FR",cat:"TG",invest:30,prices:{"23/02/25":30,"25/03/26":35},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/CRZ/GG54.jpg"},
+   imgUrl:"https://images.pokemontcg.io/swsh12pt5/GG54_hires.png"},
   {id:58,name:"LUMINÉON V",ref:"156/172",set:"BRS FR",cat:"SAR",invest:27,prices:{"23/02/25":25,"25/03/26":23},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/BRS/156.jpg"},
+   imgUrl:"https://images.pokemontcg.io/swsh9/156_hires.png"},
   {id:59,name:"LUMINÉON V GG",ref:"GG39/GG70",set:"CRZ FR",cat:"TG",invest:15,prices:{"23/02/25":15,"25/03/26":20},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/CRZ/GG39.jpg"},
+   imgUrl:"https://images.pokemontcg.io/swsh12pt5/GG39_hires.png"},
   {id:60,name:"ZARBI V",ref:"177/195",set:"SIT FR",cat:"SAR",invest:35,prices:{"23/02/25":40,"25/03/26":37},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/SIT/177.jpg"},
+   imgUrl:"https://images.pokemontcg.io/swsh12/177_hires.png"},
   {id:61,name:"BERSEKATT DE GALAR V",ref:"184/196",set:"SIT FR",cat:"SAR",invest:47,prices:{"23/02/25":38,"25/03/26":30},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/SIT/184.jpg"},
+   imgUrl:"https://images.pokemontcg.io/swsh12/184_hires.png"},
   {id:62,name:"MOUFFLAIR V",ref:"181/195",set:"SIT FR",cat:"SAR",invest:15,prices:{"23/02/25":20,"25/03/26":16},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/SIT/181.jpg"},
+   imgUrl:"https://images.pokemontcg.io/swsh12/181_hires.png"},
   {id:63,name:"TAPATOÈS EX",ref:"264/193",set:"PAL FR",cat:"SAR",invest:10,prices:{"23/02/25":15,"25/03/26":12},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/PAL/264.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv2/264_hires.png"},
   {id:64,name:"ROC-DE-FER EX",ref:"207/162",set:"TEF FR",cat:"SAR",invest:43,prices:{"23/02/25":50,"25/03/26":40},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/TEF/207.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv5/207_hires.png"},
   {id:65,name:"FORT IVOIRE EX",ref:"246/198",set:"SVI FR",cat:"SAR",invest:15,prices:{"25/03/26":25},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/SVI/246.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv1/246_hires.png"},
   {id:66,name:"REGIDRAG O V",ref:"184/195",set:"SIT FR",cat:"SAR",invest:15,prices:{"25/03/26":25},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/SIT/184.jpg"},
+   imgUrl:"https://images.pokemontcg.io/swsh12/184_hires.png"},
   {id:67,name:"PALMVAL EX",ref:"260/193",set:"PAL FR",cat:"SAR",invest:15,prices:{"25/03/26":15},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/PAL/260.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv2/260_hires.png"},
   {id:68,name:"PIKACHU VMAX TG",ref:"TG17/TG30",set:"BRS FR",cat:"TG",invest:54,prices:{"23/02/25":65,"25/03/26":67},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/BRS/TG17.jpg"},
+   imgUrl:"https://images.pokemontcg.io/swsh9/TG17_hires.png"},
   {id:69,name:"BRASÉGALI VMAX TG",ref:"TG15/TG30",set:"AST FR",cat:"TG",invest:20,prices:{"30/03/24":15,"23/02/25":30,"25/03/26":26},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/AST/TG15.jpg"},
+   imgUrl:"https://images.pokemontcg.io/swsh10/TG15_hires.png"},
   {id:70,name:"MEW GG",ref:"GG10/GG20",set:"CRZ FR",cat:"TG",invest:7,prices:{"30/03/24":7.5,"25/03/26":31},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/CRZ/GG10.jpg"},
+   imgUrl:"https://images.pokemontcg.io/swsh12pt5/GG10_hires.png"},
   {id:71,name:"DEOXYS GG",ref:"GG12/GG20",set:"CRZ FR",cat:"TG",invest:4,prices:{"30/03/24":3.5,"25/03/26":16},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/CRZ/GG12.jpg"},
+   imgUrl:"https://images.pokemontcg.io/swsh12pt5/GG12_hires.png"},
   {id:72,name:"DRACAUFEU TG",ref:"TG03/TG30",set:"BRS FR",cat:"TG",invest:9,prices:{"30/03/24":10,"25/03/26":20},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/BRS/TG03.jpg"},
+   imgUrl:"https://images.pokemontcg.io/swsh9/TG03_hires.png"},
   {id:73,name:"CORVAILLUS VMAX TG",ref:"TG19/TG30",set:"BRS FR",cat:"TG",invest:11,prices:{"30/03/24":12,"23/02/25":12,"25/03/26":13},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/BRS/TG19.jpg"},
+   imgUrl:"https://images.pokemontcg.io/swsh9/TG19_hires.png"},
   {id:74,name:"ÉTHERNATOS VMAX TG",ref:"TG22/TG30",set:"BRS FR",cat:"TG",invest:8,prices:{"30/03/24":15,"23/02/25":15,"25/03/26":13},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/BRS/TG22.jpg"},
+   imgUrl:"https://images.pokemontcg.io/swsh9/TG22_hires.png"},
   {id:75,name:"SHIFOURS VMAX TG",ref:"TG21/TG30",set:"BRS FR",cat:"TG",invest:10,prices:{"30/03/24":14,"23/02/25":13,"25/03/26":15},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/BRS/TG21.jpg"},
+   imgUrl:"https://images.pokemontcg.io/swsh9/TG21_hires.png"},
   // ── AR ──
   {id:76,name:"GROUDON AR",ref:"199/182",set:"PAR FR",cat:"AR",invest:null,prices:{"30/03/24":90,"25/03/26":140},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/PAR/199.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv4/199_hires.png"},
   {id:77,name:"ARTIKODIN AR",ref:"161/159",set:"JTG FR",cat:"AR",invest:null,prices:{"25/03/26":72},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/JTG/161.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv9/161_hires.png"},
   {id:78,name:"TYRANOCIF AR",ref:"222/193",set:"PAL FR",cat:"AR",invest:40,prices:{"30/03/24":35,"25/03/26":60},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/PAL/222.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv2/222_hires.png"},
   {id:79,name:"FEUNARD AR",ref:"199/197",set:"OBF FR",cat:"AR",invest:19.5,prices:{"30/03/24":17,"25/03/26":35},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/OBF/199.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv3/199_hires.png"},
   {id:80,name:"YVELTAL AR",ref:"205/182",set:"PAR FR",cat:"AR",invest:null,prices:{"30/03/24":13,"25/03/26":32},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/PAR/205.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv4/205_hires.png"},
   {id:81,name:"MAGIRÊVE AR",ref:"212/193",set:"PAL FR",cat:"AR",invest:10,prices:{"25/03/26":27},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/PAL/212.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv2/212_hires.png"},
   {id:82,name:"SIMULARBR AR",ref:"219/193",set:"PAL FR",cat:"AR",invest:9,prices:{"30/03/24":9.5,"25/03/26":25},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/PAL/219.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv2/219_hires.png"},
   {id:83,name:"INCISACHE AR",ref:"077/064",set:"SFA FR",cat:"AR",invest:11,prices:{"25/03/26":22},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/SFA/077.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv6pt5/077_hires.png"},
   {id:84,name:"STEELIX AR",ref:"208/182",set:"PAR FR",cat:"AR",invest:19.9,prices:{"30/03/24":27,"25/03/26":25},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/PAR/208.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv4/208_hires.png"},
   {id:85,name:"BABIMANTA AR",ref:"189/182",set:"PAR FR",cat:"AR",invest:11,prices:{"25/03/26":18},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/PAR/189.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv4/189_hires.png"},
   {id:86,name:"CIZAYOX AR",ref:"205/197",set:"OBF FR",cat:"AR",invest:5,prices:{"30/03/24":7.5,"25/03/26":18},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/OBF/205.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv3/205_hires.png"},
   {id:87,name:"SCARABRUTE AR",ref:"168/167",set:"TWN FR",cat:"AR",invest:9,prices:{"25/03/26":14},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/TWN/168.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv7pt5/168_hires.png"},
   {id:88,name:"PHIONE AR",ref:"175/167",set:"TWM FR",cat:"AR",invest:8,prices:{"25/03/26":14},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/TWM/175.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv6/175_hires.png"},
   {id:89,name:"TAUROS DE PALDEA AR",ref:"218/193",set:"PAL FR",cat:"AR",invest:13.5,prices:{"30/03/24":15,"25/03/26":25},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/PAL/218.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv2/218_hires.png"},
   {id:90,name:"SHAOFOUINE AR",ref:"200/182",set:"PAR FR",cat:"AR",invest:9,prices:{"30/03/24":10,"25/03/26":14},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/PAR/200.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv4/200_hires.png"},
   {id:91,name:"MATOURGEON AR",ref:"197/193",set:"PAL FR",cat:"AR",invest:8,prices:{"30/03/24":10,"25/03/26":11},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/PAL/197.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv2/197_hires.png"},
   {id:92,name:"FAMIGNOL AR",ref:"226/193",set:"PAL FR",cat:"AR",invest:null,prices:{"30/03/24":14,"25/03/26":28},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/PAL/226.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv2/226_hires.png"},
   // ── 151 ──
   {id:93,name:"SALAMÈCHE AR",ref:"168/165",set:"151 FR",cat:"151",invest:null,prices:{"30/03/24":46,"30/03/25":60,"26/02/26":85,"25/03/26":150},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/MEW/168.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv3pt5/168_hires.png"},
   {id:94,name:"REPTINCEL AR",ref:"169/165",set:"151 FR",cat:"151",invest:null,prices:{"30/03/24":52,"30/03/25":40,"26/02/26":55,"25/03/26":105},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/MEW/169.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv3pt5/169_hires.png"},
   {id:95,name:"TÊTARTE AR",ref:"176/165",set:"151 FR",cat:"151",invest:null,prices:{"30/03/24":24,"30/03/25":30,"26/02/26":27,"25/03/26":95},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/MEW/176.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv3pt5/176_hires.png"},
   {id:96,name:"BULBIZARRE AR",ref:"166/165",set:"151 FR",cat:"151",invest:null,prices:{"30/03/24":44,"30/03/25":40,"26/02/26":55,"25/03/26":95},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/MEW/166.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv3pt5/166_hires.png"},
   {id:97,name:"PIKACHU AR",ref:"173/165",set:"151 FR",cat:"151",invest:null,prices:{"30/03/24":35,"30/03/25":50,"26/02/26":62,"25/03/26":90},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/MEW/173.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv3pt5/173_hires.png"},
   {id:98,name:"CARAPUCE AR",ref:"170/165",set:"151 FR",cat:"151",invest:null,prices:{"30/03/24":47,"30/03/25":55,"26/02/26":60,"25/03/26":83},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/MEW/170.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv3pt5/170_hires.png"},
   {id:99,name:"HERBIZARRE AR",ref:"167/165",set:"151 FR",cat:"151",invest:37,prices:{"30/03/24":40,"30/03/25":43,"26/02/26":45,"25/03/26":83},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/MEW/167.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv3pt5/167_hires.png"},
   {id:100,name:"CARABAFFE AR",ref:"171/165",set:"151 FR",cat:"151",invest:null,prices:{"30/03/24":39,"30/03/25":44,"26/02/26":55,"25/03/26":88},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/MEW/171.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv3pt5/171_hires.png"},
   {id:101,name:"DRACO AR",ref:"181/165",set:"151 FR",cat:"151",invest:30,prices:{"30/03/24":40,"30/03/25":45,"26/02/26":60,"25/03/26":83},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/MEW/181.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv3pt5/181_hires.png"},
   {id:102,name:"FLORIZARRE EX SAR",ref:"198/165",set:"151 FR",cat:"151",invest:45,prices:{"30/03/24":75,"30/03/25":80,"26/02/26":100,"25/03/26":180},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/MEW/198.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv3pt5/198_hires.png"},
   {id:103,name:"ÉLECTHOR EX SAR",ref:"202/165",set:"151 FR",cat:"151",invest:65,prices:{"30/03/24":76,"30/03/25":80,"26/02/26":135,"25/03/26":190},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/MEW/202.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv3pt5/202_hires.png"},
   {id:104,name:"TORTANK EX SAR",ref:"200/165",set:"151 FR",cat:"151",invest:null,prices:{"30/03/24":69,"30/03/25":80,"26/02/26":120,"25/03/26":175},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/MEW/200.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv3pt5/200_hires.png"},
   {id:105,name:"ALAKAZAM EX SAR",ref:"201/165",set:"151 FR",cat:"151",invest:null,prices:{"30/03/24":62,"30/03/25":67,"26/02/26":85,"25/03/26":180},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/MEW/201.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv3pt5/201_hires.png"},
   {id:106,name:"MEW EX SAR PROMO",ref:"053",set:"151 FR PROMO",cat:"151",invest:null,prices:{"30/03/24":28,"30/03/25":50,"26/02/26":95,"25/03/26":100},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/MEW/053.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv3pt5/053_hires.png"},
   {id:107,name:"MEWTWO AR PROMO",ref:"052",set:"151 FR PROMO",cat:"151",invest:null,prices:{"30/03/24":17,"30/03/25":30,"26/02/26":70,"25/03/26":65},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/MEW/052.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv3pt5/052_hires.png"},
   {id:108,name:"PSYKOKWAK AR",ref:"175/165",set:"151 FR",cat:"151",invest:null,prices:{"30/03/24":20,"30/03/25":26,"26/02/26":30,"25/03/26":44},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/MEW/175.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv3pt5/175_hires.png"},
   {id:109,name:"DRACAUFEU EX FA",ref:"183/165",set:"151 FR",cat:"151",invest:null,prices:{"30/03/24":115,"30/03/25":95,"26/02/26":60,"25/03/26":70},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/MEW/183.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv3pt5/183_hires.png"},
   {id:110,name:"MEW EX FA",ref:"193/165",set:"151 FR",cat:"151",invest:null,prices:{"30/03/24":50,"30/03/25":50,"26/02/26":35,"25/03/26":37},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/MEW/193.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv3pt5/193_hires.png"},
   // ── EX ancienne ère ──
   {id:111,name:"GARDEVOIR EX XY",ref:"116/114",set:"XY FR",cat:"EX",invest:55,prices:{"25/03/26":110},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/XY1/116.jpg"},
+   imgUrl:"https://images.pokemontcg.io/xy1/116_hires.png"},
   {id:112,name:"KYOGRE EX",ref:"6/34",set:"XY1 FR",cat:"EX",invest:20,prices:{"25/03/26":200},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/XYPR/6.jpg"},
+   imgUrl:"https://images.pokemontcg.io/xyp/6_hires.png"},
   {id:113,name:"MÉGA LOCKPIN EX",ref:"128/094",set:"XY3 FR",cat:"EX",invest:25,prices:{"25/03/26":25},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/FLF/128.jpg"},
+   imgUrl:"https://images.pokemontcg.io/xy3/128_hires.png"},
   {id:114,name:"MÉGA SHARPEDO EX",ref:"127/094",set:"XY3 FR",cat:"EX",invest:30,prices:{"25/03/26":40},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/FLF/127.jpg"},
+   imgUrl:"https://images.pokemontcg.io/xy3/127_hires.png"},
   {id:115,name:"M RAYQUAZA EX 25ANS",ref:"76/108",set:"XY6 25ANS FR",cat:"EX",invest:34.9,prices:{"30/03/24":35,"23/02/25":40,"25/03/26":110},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/RSK/76.jpg"},
+   imgUrl:"https://images.pokemontcg.io/xy6/76_hires.png"},
   {id:116,name:"VOLCANION EX",ref:"182/159",set:"JTG FR",cat:"EX",invest:30,prices:{"25/03/26":40},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/JTG/182.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sv9/182_hires.png"},
   {id:117,name:"DRACAUFEU GX",ref:"20/147",set:"SM3 FR",cat:"GX",invest:16.9,prices:{"30/03/24":16,"23/02/25":16,"25/03/26":19},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/BS/20.jpg"},
+   imgUrl:"https://images.pokemontcg.io/sm35/20_hires.png"},
   // ── Vintage / Légende ──
   {id:118,name:"LUGIA LÉGENDE COMPLET",ref:"—",set:"HS FR",cat:"VINTAGE",invest:50,prices:{"25/03/26":170},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/HS/113.jpg"},
+   imgUrl:"https://images.pokemontcg.io/hgss1/113_hires.png"},
   {id:119,name:"HO-OH LÉGENDE COMPLET",ref:"—",set:"HS FR",cat:"VINTAGE",invest:50,prices:{"25/03/26":170},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/HS/111.jpg"},
+   imgUrl:"https://images.pokemontcg.io/hgss1/111_hires.png"},
   {id:120,name:"SUICUNE ENTEI LÉGENDE",ref:"—",set:"HS FR",cat:"VINTAGE",invest:50,prices:{"25/03/26":100},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/HS/115.jpg"},
+   imgUrl:"https://images.pokemontcg.io/hgss1/115_hires.png"},
   {id:121,name:"KYOGRE & GROUDON LÉGENDE",ref:"—",set:"HS FR",cat:"VINTAGE",invest:25,prices:{"25/03/26":80},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/HS/87.jpg"},
+   imgUrl:"https://images.pokemontcg.io/hgss1/87_hires.png"},
   {id:122,name:"RAIKOU & SUICUNE LÉGENDE",ref:"—",set:"HS FR",cat:"VINTAGE",invest:25,prices:{"25/03/26":70},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/HS/117.jpg"},
+   imgUrl:"https://images.pokemontcg.io/hgss1/117_hires.png"},
   {id:123,name:"STELIX PRIME",ref:"87/95",set:"HS FR",cat:"VINTAGE",invest:40,prices:{"30/03/24":40,"23/02/25":40,"25/03/26":50},graded:"PCA 7",
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/HS/87.jpg"},
+   imgUrl:"https://images.pokemontcg.io/hgss1/87_hires.png"},
   {id:124,name:"FLORIZARRE 25ANS",ref:"15/102",set:"B&W 25ANS FR",cat:"VINTAGE",invest:19.9,prices:{"30/03/24":17,"23/02/25":17,"25/03/26":30},graded:null,
-   imgUrl:"https://www.pokecardex.com/assets/img/sets/CEL25/15.jpg"},
+   imgUrl:"https://images.pokemontcg.io/cel25/15_hires.png"},
 ];
 
 // ════════════════════════════════════════════════════
@@ -1507,7 +1312,7 @@ function renderGrid() {
     const locIcon = c.loc==='banque' ? '🏦' : '🏠';
     return `<div class="card-tile${isChase?' chase-tile':''}" style="animation-delay:${(i%PER)*0.025}s" onclick="openModal(${c.id})">
       <div class="card-img-wrap">
-        ${c.imgUrl ? `<img src="${c.imgUrl}" alt="${c.name}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` : ''}
+        ${c.imgUrl ? `<img src="${c.imgUrl}" alt="${c.name}" loading="lazy" onerror="if(this.src.includes('_hires.png')){this.src=this.src.replace('_hires.png','.png');}else{this.style.display='none';this.nextElementSibling.style.display='flex';}" crossorigin="anonymous">` : ''}
         <div class="card-img-placeholder" style="${c.imgUrl?'display:none':''}">
           <div class="ball">⚡</div>
           <div style="font-size:9px;padding:0 8px;text-align:center">${c.name}</div>
@@ -1537,7 +1342,7 @@ function renderList() {
   el.innerHTML = page.map((c,i) => {
     const p=latestP(c), r=roi(c), ch=chgTotal(c);
     const isChase = c.cat==='CHASE';
-    const thumb = c.imgUrl ? `<img class="t-thumb" src="${c.imgUrl}" alt="${c.name}" onerror="this.style.background='var(--lift)';this.src=''">` : `<div class="t-thumb" style="display:flex;align-items:center;justify-content:center;font-size:18px;opacity:.2">⚡</div>`;
+    const thumb = c.imgUrl ? `<img class="t-thumb" src="${c.imgUrl}" alt="${c.name}" onerror="if(this.src.includes('_hires.png')){this.src=this.src.replace('_hires.png','.png');}else{this.style.background='var(--lift)';this.src='';}" crossorigin="anonymous">` : `<div class="t-thumb" style="display:flex;align-items:center;justify-content:center;font-size:18px;opacity:.2">⚡</div>`;
     const invest = isChase ? '<span class="pill" style="background:rgba(245,200,66,.15);color:var(--gold)">🎯 CHASE</span>' : c.invest===null ? '<span class="pill pill-gold">PACKÉ</span>' : fEur(c.invest);
     const graded = c.graded ? `<span class="pill" style="background:rgba(68,102,255,.15);color:#88aaff">${c.graded}</span>` : '—';
     const locIcon = c.loc==='banque' ? '🏦 Banque' : '🏠 Maison';
@@ -1590,7 +1395,10 @@ function openModal(id) {
   document.getElementById('imgUrlInp').value = c.imgUrl || '';
   if (c.imgUrl) {
     img.src = c.imgUrl; img.style.display='block'; ph.style.display='none';
-    img.onerror = () => { img.style.display='none'; ph.style.display='flex'; };
+    img.onerror = () => {
+      if(img.src.includes('_hires.png')){img.src=img.src.replace('_hires.png','.png');}
+      else{img.style.display='none';ph.style.display='flex';}
+    };
   } else { img.style.display='none'; ph.style.display='flex'; }
   // Prices
   renderModalPrices(c);
@@ -1806,8 +1614,6 @@ function showSection(s) {
   document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
   document.getElementById('chipsBar').style.display='none';
   document.getElementById('sortbar') && (document.querySelector('.sortbar').style.display='none');
-  // Sync bottom nav
-  setActiveBottomNav(s);
   if (s==='collection') {
     document.getElementById('collectionSection').style.display='block';
     document.getElementById('chipsBar').style.display='flex';
@@ -1890,28 +1696,16 @@ function clearAddForm() {
 }
 
 // ════════════════════════════════════════════════════
-// MOBILE BOTTOM NAV
-// ════════════════════════════════════════════════════
-function setActiveBottomNav(section) {
-  document.querySelectorAll('.bnav-item').forEach(el => el.classList.remove('active'));
-  const el = document.getElementById('bnav-' + section);
-  if (el) el.classList.add('active');
-}
-
-// ════════════════════════════════════════════════════
 // REFRESH (simulated — for real CM API needs OAuth)
 // ════════════════════════════════════════════════════
 function doRefresh() {
   const btn=document.getElementById('refreshBtn');
-  const ico=document.getElementById('refreshIco');
   btn.classList.add('spin-anim');
   btn.disabled=true;
-  if (ico) { ico.style.display='inline-block'; ico.style.animation='rotate 1s linear infinite'; }
   // Simulate network call (2s)
   setTimeout(()=>{
     btn.classList.remove('spin-anim');
     btn.disabled=false;
-    if (ico) { ico.style.animation=''; }
     toast('✓ Pour actualiser les prix en temps réel, connecte l\'API Cardmarket avec tes identifiants développeur. Entre-temps, clique sur une carte → bouton "Enregistrer" pour mettre à jour manuellement.');
   },1500);
 }
